@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barnehage App - iPhone Mockups</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #F2F2F7;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1d1d1f;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: none;
+        }
+        
+        .section-title {
+            color: #1d1d1f;
+            font-size: 1.8em;
+            margin: 40px 0 20px;
+            text-align: center;
+            text-shadow: none;
+        }
+        
+        .phones-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .iphone {
+            width: 320px;
+            height: 640px;
+            background: #1d1d1f;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 28px;
+            background: #1d1d1f;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #F2F2F7;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 15px;
+            padding-top: 8px;
+            font-weight: 600;
+        }
+        
+        .time {
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .indicators {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .content {
+            height: calc(100% - 44px);
+            overflow-y: auto;
+            background: #F2F2F7;
+        }
+        
+        /* Header styles - Apple style */
+        .header {
+            background: #007AFF;
+            padding: 24px 20px 20px 20px;
+            color: white;
+            position: relative;
+        }
+        
+        .header h2 {
+            font-size: 32px;
+            margin-bottom: 4px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            opacity: 0.95;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        /* Home screen - Apple card style with playful elements */
+        .quick-action {
+            background: white;
+            margin: 16px;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .quick-action h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #1d1d1f;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        
+        .child-selector {
+            background: #F2F2F7;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .child-selector:active {
+            transform: scale(0.98);
+        }
+        
+        .child-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: #8E8E93;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(142, 142, 147, 0.3);
+        }
+        
+        .child-info {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .child-info h4 {
+            font-size: 17px;
+            margin-bottom: 3px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            color: #1d1d1f;
+        }
+        
+        .child-info p {
+            font-size: 14px;
+            color: #8E8E93;
+            font-weight: 500;
+        }
+        
+        .stamp-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transition: all 0.2s ease;
+            letter-spacing: -0.2px;
+        }
+        
+        .stamp-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .stamp-btn.out {
+            background: #FF3B30;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+        }
+        
+        .status-info {
+            background: #E3F2E1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #34C759;
+            margin-top: 16px;
+            font-weight: 500;
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+        
+        /* Mitt Barn screen - Apple style cards */
+        .child-profile {
+            background: white;
+            margin: 16px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        
+        .child-header {
+            background: #8E8E93;
+            padding: 32px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .child-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            background: white;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .child-header h3 {
+            font-size: 26px;
+            margin-bottom: 6px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .child-header p {
+            opacity: 0.95;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .info-section {
+            padding: 20px;
+        }
+        
+        .info-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #F2F2F7;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-item h4 {
+            font-size: 13px;
+            color: #8E8E93;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .info-item p {
+            font-size: 17px;
+            color: #1d1d1f;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+        
+        .allergy-tag {
+            display: inline-block;
+            background: #FFEBE9;
+            color: #FF3B30;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 59, 48, 0.15);
+        }
+        
+        /* Feed screen - iOS style cards */
+        .feed-post {
+            background: white;
+            margin: 12px 16px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        
+        .post-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #F2F2F7;
+        }
+        
+        .post-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            background: #8E8E93;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(142, 142, 147, 0.4);
+        }
+        
+        .post-info h4 {
+            font-size: 16px;
+            margin-bottom: 3px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.3px;
+        }
+        
+        .post-info p {
+            font-size: 13px;
+            color: #8E8E93;
+            font-weight: 500;
+        }
+        
+        .post-image {
+            width: 100%;
+            height: 200px;
+            background: #E5E5EA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            position: relative;
+        }
+        
+        .post-content {
+            padding: 16px;
+        }
+        
+        .post-content h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.3px;
+        }
+        
+        .post-content p {
+            font-size: 15px;
+            color: #48484A;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+        
+        /* Admin screens - Clean iOS style */
+        .children-list {
+            padding: 16px;
+        }
+        
+        .child-card {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+        
+        .child-card:active {
+            transform: scale(0.98);
+        }
+        
+        .child-card .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            background: #34C759;
+            box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2);
+        }
+        
+        .child-card .status-dot.out {
+            background: #D1D1D6;
+            box-shadow: 0 0 0 3px rgba(209, 209, 214, 0.2);
+        }
+        
+        .create-post {
+            background: white;
+            margin: 16px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        
+        .create-post h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.3px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid #E5E5EA;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            color: #1d1d1f;
+            background: #F9F9F9;
+            transition: all 0.2s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #8E8E93;
+            background: white;
+        }
+        
+        .input-field.textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .upload-btn {
+            background: #F9F9F9;
+            border: 2px dashed #C7C7CC;
+            padding: 48px 20px;
+            border-radius: 16px;
+            text-align: center;
+            color: #8E8E93;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .upload-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .publish-btn {
+            background: #8E8E93;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(142, 142, 147, 0.3);
+            transition: all 0.2s ease;
+            letter-spacing: -0.2px;
+        }
+        
+        .publish-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Bottom navigation - iOS Tab Bar style */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 10px;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #8E8E93;
+            font-size: 10px;
+            padding: 8px 16px;
+            font-weight: 500;
+            letter-spacing: -0.1px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:active {
+            transform: scale(0.9);
+        }
+        
+        .nav-item.active {
+            color: #007AFF;
+        }
+        
+        .nav-icon {
+            font-size: 26px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            transform: scale(1.1);
+        }
+        
+        .screen-label {
+            text-align: center;
+            color: #1d1d1f;
+            margin-top: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Barnehage App - iPhone Mockups</h1>
+        
+        <h2 class="section-title">👨‍👩‍👧 Foreldre-visning</h2>
+        
+        <div class="phones-container">
+            <!-- Screen 1: Hjem - Innstempel -->
+            <div>
+                <div class="iphone">
+                    <div class="notch"></div>
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span class="time">9:41</span>
+                            <div class="indicators">
+                                <span>📶</span>
+                                <span>📡</span>
+                                <span>🔋</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="header">
+                                <h2>Hjem</h2>
+                                <p>Mandag, 24. november 2025</p>
+                            </div>
+                            
+                            <div class="quick-action">
+                                <h3>Stempling</h3>
+                                
+                                <div class="child-selector">
+                                    <div class="child-avatar">L</div>
+                                    <div class="child-info">
+                                        <h4>Liam Hansen</h4>
+                                        <p>4 år • Blå gruppe</p>
+                                    </div>
+                                    <span style="font-size: 20px;">›</span>
+                                </div>
+                                
+                                <button class="stamp-btn">✓ Stemple inn</button>
+                                <button class="stamp-btn out">✗ Stemple ut</button>
+                                
+                                <div class="status-info">
+                                    ✓ Liam er for tiden i barnehagen<br>
+                                    Ankomst: 08:15
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bottom-nav">
+                            <div class="nav-item active">
+                                <div class="nav-icon">🏠</div>
+                                <span>Hjem</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">👶</div>
+                                <span>Mitt barn</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">📸</div>
+                                <span>Feed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Hjem - Innstempel</div>
+            </div>
+            
+            <!-- Screen 2: Mitt Barn -->
+            <div>
+                <div class="iphone">
+                    <div class="notch"></div>
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span class="time">9:41</span>
+                            <div class="indicators">
+                                <span>📶</span>
+                                <span>📡</span>
+                                <span>🔋</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="header">
+                                <h2>Mitt barn</h2>
+                                <p>Barneinformasjon</p>
+                            </div>
+                            
+                            <div class="child-profile">
+                                <div class="child-header">
+                                    <div class="child-photo">👦</div>
+                                    <h3>Liam Hansen</h3>
+                                    <p>Født 15. mars 2021</p>
+                                </div>
+                                
+                                <div class="info-section">
+                                    <div class="info-item">
+                                        <h4>Alder</h4>
+                                        <p>4 år</p>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <h4>Gruppe</h4>
+                                        <p>Blå gruppe</p>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <h4>Kontaktperson</h4>
+                                        <p>Emma Larsen</p>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <h4>Allergier og matbegrensninger</h4>
+                                        <div>
+                                            <span class="allergy-tag">🥜 Nøtter</span>
+                                            <span class="allergy-tag">🥚 Egg</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <h4>Viktig informasjon</h4>
+                                        <p>Trenger inhalator ved behov. Må hvile etter lunsj.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bottom-nav">
+                            <div class="nav-item">
+                                <div class="nav-icon">🏠</div>
+                                <span>Hjem</span>
+                            </div>
+                            <div class="nav-item active">
+                                <div class="nav-icon">👶</div>
+                                <span>Mitt barn</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">📸</div>
+                                <span>Feed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Mitt barn - Profil</div>
+            </div>
+            
+            <!-- Screen 3: Feed -->
+            <div>
+                <div class="iphone">
+                    <div class="notch"></div>
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span class="time">9:41</span>
+                            <div class="indicators">
+                                <span>📶</span>
+                                <span>📡</span>
+                                <span>🔋</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="header">
+                                <h2>Aktiviteter</h2>
+                                <p>Se hva barna gjør i dag</p>
+                            </div>
+                            
+                            <div class="feed-post">
+                                <div class="post-header">
+                                    <div class="post-avatar">BH</div>
+                                    <div class="post-info">
+                                        <h4>Blå gruppe</h4>
+                                        <p>I dag kl. 10:30</p>
+                                    </div>
+                                </div>
+                                <div class="post-image">🎨</div>
+                                <div class="post-content">
+                                    <h3>Maling og kreativitet</h3>
+                                    <p>I dag hadde vi en fin maletime! Barna lagde flotte høstbilder med fingerfarger.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feed-post">
+                                <div class="post-header">
+                                    <div class="post-avatar">RG</div>
+                                    <div class="post-info">
+                                        <h4>Rød gruppe</h4>
+                                        <p>I går kl. 14:15</p>
+                                    </div>
+                                </div>
+                                <div class="post-image">🌳</div>
+                                <div class="post-content">
+                                    <h3>Tur til skogen</h3>
+                                    <p>Vi hadde en fantastisk tur til skogen hvor barna lekte og utforsket naturen.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bottom-nav">
+                            <div class="nav-item">
+                                <div class="nav-icon">🏠</div>
+                                <span>Hjem</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">👶</div>
+                                <span>Mitt barn</span>
+                            </div>
+                            <div class="nav-item active">
+                                <div class="nav-icon">📸</div>
+                                <span>Feed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Feed - Aktiviteter</div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">👩‍🏫 Barnehage personale-visning</h2>
+        
+        <div class="phones-container">
+            <!-- Screen 4: Admin - Barnoversikt -->
+            <div>
+                <div class="iphone">
+                    <div class="notch"></div>
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span class="time">9:41</span>
+                            <div class="indicators">
+                                <span>📶</span>
+                                <span>📡</span>
+                                <span>🔋</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="header">
+                                <h2>Barn oversikt</h2>
+                                <p>Blå gruppe • 12 barn til stede</p>
+                            </div>
+                            
+                            <div class="children-list">
+                                <div class="child-card">
+                                    <div class="status-dot"></div>
+                                    <div class="child-avatar">L</div>
+                                    <div class="child-info">
+                                        <h4>Liam Hansen</h4>
+                                        <p>Ankomst: 08:15 • Allergier: Nøtter, Egg</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-card">
+                                    <div class="status-dot"></div>
+                                    <div class="child-avatar">E</div>
+                                    <div class="child-info">
+                                        <h4>Emma Johansen</h4>
+                                        <p>Ankomst: 07:45 • Ingen allergier</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-card">
+                                    <div class="status-dot out"></div>
+                                    <div class="child-avatar">N</div>
+                                    <div class="child-info">
+                                        <h4>Noah Olsen</h4>
+                                        <p>Hjemme i dag</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-card">
+                                    <div class="status-dot"></div>
+                                    <div class="child-avatar">S</div>
+                                    <div class="child-info">
+                                        <h4>Sofia Andersen</h4>
+                                        <p>Ankomst: 08:30 • Allergier: Laktose</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-card">
+                                    <div class="status-dot"></div>
+                                    <div class="child-avatar">O</div>
+                                    <div class="child-info">
+                                        <h4>Oliver Berg</h4>
+                                        <p>Ankomst: 09:00 • Ingen allergier</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bottom-nav">
+                            <div class="nav-item active">
+                                <div class="nav-icon">👥</div>
+                                <span>Barn</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">✏️</div>
+                                <span>Legg til</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">⏱️</div>
+                                <span>Stempling</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Personale - Barnoversikt</div>
+            </div>
+            
+            <!-- Screen 5: Admin - Lag innlegg -->
+            <div>
+                <div class="iphone">
+                    <div class="notch"></div>
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span class="time">9:41</span>
+                            <div class="indicators">
+                                <span>📶</span>
+                                <span>📡</span>
+                                <span>🔋</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="header">
+                                <h2>Nytt innlegg</h2>
+                                <p>Del dagens aktiviteter</p>
+                            </div>
+                            
+                            <div class="create-post">
+                                <h3>Opprett innlegg</h3>
+                                
+                                <input type="text" class="input-field" placeholder="Tittel på aktivitet">
+                                
+                                <textarea class="input-field textarea" placeholder="Beskriv hva dere gjorde i dag..."></textarea>
+                                
+                                <div class="upload-btn">
+                                    <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
+                                    <div>Trykk for å laste opp bilde</div>
+                                </div>
+                                
+                                <button class="publish-btn">Publiser innlegg</button>
+                            </div>
+                        </div>
+                        
+                        <div class="bottom-nav">
+                            <div class="nav-item">
+                                <div class="nav-icon">👥</div>
+                                <span>Barn</span>
+                            </div>
+                            <div class="nav-item active">
+                                <div class="nav-icon">✏️</div>
+                                <span>Legg til</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">⏱️</div>
+                                <span>Stempling</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Personale - Lag innlegg</div>
+            </div>
+            
+            <!-- Screen 6: Admin - Stempling -->
+            <div>
+                <div class="iphone">
+                    <div class="notch"></div>
+                    <div class="screen">
+                        <div class="status-bar">
+                            <span class="time">9:41</span>
+                            <div class="indicators">
+                                <span>📶</span>
+                                <span>📡</span>
+                                <span>🔋</span>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="header">
+                                <h2>Stempling</h2>
+                                <p>Registrer inn/ut for barn</p>
+                            </div>
+                            
+                            <div class="quick-action">
+                                <h3>Velg barn</h3>
+                                
+                                <input type="text" class="input-field" placeholder="🔍 Søk etter barn...">
+                                
+                                <div class="child-selector">
+                                    <div class="child-avatar">L</div>
+                                    <div class="child-info">
+                                        <h4>Liam Hansen</h4>
+                                        <p>Blå gruppe • Til stede</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-selector">
+                                    <div class="child-avatar">E</div>
+                                    <div class="child-info">
+                                        <h4>Emma Johansen</h4>
+                                        <p>Blå gruppe • Til stede</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-selector">
+                                    <div class="child-avatar">S</div>
+                                    <div class="child-info">
+                                        <h4>Sofia Andersen</h4>
+                                        <p>Blå gruppe • Til stede</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="child-selector">
+                                    <div class="child-avatar">O</div>
+                                    <div class="child-info">
+                                        <h4>Oliver Berg</h4>
+                                        <p>Blå gruppe • Til stede</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bottom-nav">
+                            <div class="nav-item">
+                                <div class="nav-icon">👥</div>
+                                <span>Barn</span>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-icon">✏️</div>
+                                <span>Legg til</span>
+                            </div>
+                            <div class="nav-item active">
+                                <div class="nav-icon">⏱️</div>
+                                <span>Stempling</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screen-label">Personale - Stempling</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
