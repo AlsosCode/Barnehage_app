@@ -1,0 +1,10 @@
+{
+  "name": "barnehage-app-demo",
+  "version": "1.0.0",
+  "description": "Barnehage App - iPhone Mockups",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel"
+  }
+}
