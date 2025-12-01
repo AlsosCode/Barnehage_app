@@ -16,18 +16,59 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
+
+      {/* Hjem/tab 1 */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="house.fill" color={color} />
+          ),
         }}
       />
+
+      {/* Se barnets info */}
       <Tabs.Screen
-        name="explore"
+        name="childinfo"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Barnet',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.fill" color={color} />
+          ),
+        }}
+      />
+
+      {/* Redigere kontaktinfo */}
+      <Tabs.Screen
+        name="editinfo"
+        options={{
+          title: 'Kontaktinfo',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="pencil" color={color} />
+          ),
+        }}
+      />
+
+      {/* Barnehageoversikt */}
+      <Tabs.Screen
+        name="status"
+        options={{
+          title: 'Oversikt',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
+          ),
+        }}
+      />
+
+      {/* Check-out/tab 3 */}
+      <Tabs.Screen
+        name="checkout"
+        options={{
+          title: 'Check-out',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="clock.fill" color={color} />
+          ),
         }}
       />
     </Tabs>
