@@ -1,0 +1,103 @@
+{
+  "children": [
+    {
+      "id": 1,
+      "name": "Liam Hansen",
+      "birthDate": "2021-03-15",
+      "age": 4,
+      "group": "Blå gruppe",
+      "allergies": [
+        "Nøtter",
+        "Egg"
+      ],
+      "status": "checked_in",
+      "checkedInAt": "2025-12-02T09:53:02.108Z",
+      "checkedOutAt": null,
+      "parentId": 1
+    },
+    {
+      "id": 2,
+      "name": "Emma Johansen",
+      "birthDate": "2021-07-20",
+      "age": 4,
+      "group": "Blå gruppe",
+      "allergies": [],
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T07:45:00Z",
+      "checkedOutAt": "2025-12-02T15:30:00Z",
+      "parentId": 2
+    },
+    {
+      "id": 3,
+      "name": "Noah Olsen",
+      "birthDate": "2022-01-10",
+      "age": 3,
+      "group": "Blå gruppe",
+      "allergies": [],
+      "status": "home",
+      "checkedInAt": null,
+      "checkedOutAt": null,
+      "parentId": 3
+    }
+  ],
+  "parents": [
+    {
+      "id": 1,
+      "name": "Kari Hansen",
+      "email": "kari.hansen@example.com",
+      "phone": "12345678",
+      "address": "Storgata 1, Oslo",
+      "childrenIds": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Per Johansen",
+      "email": "per.johansen@example.com",
+      "phone": "87654321",
+      "address": "Lille vei 5, Bergen",
+      "childrenIds": [
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Sofia Andersen",
+      "email": "sofia.andersen@example.com",
+      "phone": "11223344",
+      "address": "Haugeveien 12, Trondheim",
+      "childrenIds": [
+        3
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "title": "Maling og kreativitet",
+      "description": "I dag hadde vi en fin maletime! Barna lagde flotte høstbilder med fingerfarger.",
+      "imageUrl": null,
+      "createdAt": "2025-12-02T10:30:00Z",
+      "createdBy": "staff",
+      "group": "Blå gruppe"
+    },
+    {
+      "id": 2,
+      "title": "Uteleker",
+      "description": "Vi var ute og lekte i snøen. Barna bygget en stor snømann!",
+      "imageUrl": null,
+      "createdAt": "2025-12-02T12:00:00Z",
+      "createdBy": "staff",
+      "group": "Blå gruppe"
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "name": "Blå gruppe",
+      "totalCapacity": 12,
+      "currentCount": 1
+    }
+  ]
+}
