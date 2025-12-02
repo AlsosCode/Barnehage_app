@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Scr
 import api, { Child, Activity } from '@/services/api';
 
 export default function HomeScreen() {
-  const [child, setChild] = useState<Child | null>(null);
+  const [children, setChildren] = useState<Child[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -16,16 +16,13 @@ export default function HomeScreen() {
     try {
       setLoading(true);
 
-      // Hent første barn (for demo)
-      const children = await api.children.getAll();
-      if (children.length > 0) {
-        const childData = children[0];
-        setChild(childData);
+      // Hent alle barn
+      const childrenData = await api.children.getAll();
+      setChildren(childrenData);
 
-        // Hent aktiviteter for barnets gruppe
-        const activitiesData = await api.activities.getAll(childData.group);
-        setActivities(activitiesData.slice(0, 3)); // Vis bare de 3 siste
-      }
+      // Hent aktiviteter
+      const activitiesData = await api.activities.getAll();
+      setActivities(activitiesData.slice(0, 3)); // Vis bare de 3 siste
     } catch (err) {
       console.error('Error fetching home data:', err);
     } finally {
@@ -33,16 +30,14 @@ export default function HomeScreen() {
     }
   };
 
-  const handleCheckIn = async () => {
-    if (!child) return;
-
+  const handleCheckIn = async (child: Child) => {
     if (child.status === 'checked_in') {
       Alert.alert('Info', `${child.name} er allerede sjekket inn.`);
       return;
     }
 
     try {
-      setActionLoading(true);
+      setActionLoading(child.id);
       await api.children.checkIn(child.id);
       Alert.alert('Suksess', `${child.name} er sjekket inn!`);
       await fetchData();
@@ -50,13 +45,11 @@ export default function HomeScreen() {
       Alert.alert('Feil', 'Kunne ikke sjekke inn. Prøv igjen.');
       console.error('Check in error:', err);
     } finally {
-      setActionLoading(false);
+      setActionLoading(null);
     }
   };
 
-  const handleCheckOut = async () => {
-    if (!child) return;
-
+  const handleCheckOut = async (child: Child) => {
     if (child.status === 'checked_out') {
       Alert.alert('Info', `${child.name} er allerede sjekket ut.`);
       return;
@@ -68,7 +61,7 @@ export default function HomeScreen() {
     }
 
     try {
-      setActionLoading(true);
+      setActionLoading(child.id);
       await api.children.checkOut(child.id);
       Alert.alert('Suksess', `${child.name} er sjekket ut!`);
       await fetchData();
@@ -76,7 +69,7 @@ export default function HomeScreen() {
       Alert.alert('Feil', 'Kunne ikke sjekke ut. Prøv igjen.');
       console.error('Check out error:', err);
     } finally {
-      setActionLoading(false);
+      setActionLoading(null);
     }
   };
 
@@ -111,10 +104,10 @@ export default function HomeScreen() {
     );
   }
 
-  if (!child) {
+  if (children.length === 0) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Ingen barneinformasjon tilgjengelig</Text>
+        <Text style={styles.errorText}>Ingen barn registrert</Text>
         <TouchableOpacity style={styles.retryButton} onPress={fetchData}>
           <Text style={styles.retryText}>Prøv igjen</Text>
         </TouchableOpacity>
@@ -135,88 +128,82 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hjem</Text>
+        <Text style={styles.greeting}>Stempling</Text>
         <Text style={styles.date}>{getCurrentDate()}</Text>
       </View>
 
-      <View style={styles.childCard}>
-        <View style={styles.childHeader}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
-          </View>
-          <View style={styles.childDetails}>
-            <Text style={styles.childName}>{child.name}</Text>
-            <Text style={styles.childGroup}>{child.group}</Text>
-          </View>
-          <View style={[
-            styles.statusBadge,
-            child.status === 'checked_in' && styles.statusIn,
-            child.status === 'checked_out' && styles.statusOut,
-            child.status === 'home' && styles.statusHome
-          ]}>
-            <Text style={styles.statusText}>
-              {child.status === 'checked_in' && '✓ Inne'}
-              {child.status === 'checked_out' && '✓ Ute'}
-              {child.status === 'home' && 'Hjemme'}
-            </Text>
-          </View>
-        </View>
+      <View style={styles.childrenSection}>
+        <Text style={styles.sectionTitle}>Alle barn</Text>
+        {children.map((child) => (
+          <View key={child.id} style={styles.childCard}>
+            <View style={styles.childHeader}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
+              </View>
+              <View style={styles.childDetails}>
+                <Text style={styles.childName}>{child.name}</Text>
+                <Text style={styles.childGroup}>{child.group}</Text>
+                {child.checkedInAt && (
+                  <Text style={styles.timeText}>
+                    Inn: {formatTime(child.checkedInAt)}
+                  </Text>
+                )}
+              </View>
+              <View style={[
+                styles.statusBadge,
+                child.status === 'checked_in' && styles.statusIn,
+                child.status === 'checked_out' && styles.statusOut,
+                child.status === 'home' && styles.statusHome
+              ]}>
+                <Text style={styles.statusText}>
+                  {child.status === 'checked_in' && '✓ Inne'}
+                  {child.status === 'checked_out' && '✓ Ute'}
+                  {child.status === 'home' && 'Hjemme'}
+                </Text>
+              </View>
+            </View>
 
-        {child.checkedInAt && (
-          <View style={styles.timeInfo}>
-            <Text style={styles.timeLabel}>Sjekket inn: </Text>
-            <Text style={styles.timeValue}>{formatTime(child.checkedInAt)}</Text>
-          </View>
-        )}
-        {child.checkedOutAt && (
-          <View style={styles.timeInfo}>
-            <Text style={styles.timeLabel}>Sjekket ut: </Text>
-            <Text style={styles.timeValue}>{formatTime(child.checkedOutAt)}</Text>
-          </View>
-        )}
-      </View>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  styles.checkInButton,
+                  (actionLoading === child.id || child.status === 'checked_in') && styles.buttonDisabled
+                ]}
+                onPress={() => handleCheckIn(child)}
+                disabled={actionLoading === child.id || child.status === 'checked_in'}
+              >
+                {actionLoading === child.id && child.status !== 'checked_in' ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Text style={styles.buttonIcon}>✓</Text>
+                    <Text style={styles.buttonText}>Inn</Text>
+                  </>
+                )}
+              </TouchableOpacity>
 
-      <View style={styles.actionsCard}>
-        <Text style={styles.sectionTitle}>Stempling</Text>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              styles.checkInButton,
-              (actionLoading || child.status === 'checked_in') && styles.buttonDisabled
-            ]}
-            onPress={handleCheckIn}
-            disabled={actionLoading || child.status === 'checked_in'}
-          >
-            {actionLoading && child.status !== 'checked_in' ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <>
-                <Text style={styles.buttonIcon}>✓</Text>
-                <Text style={styles.buttonText}>Stempel inn</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              styles.checkOutButton,
-              (actionLoading || child.status !== 'checked_in') && styles.buttonDisabled
-            ]}
-            onPress={handleCheckOut}
-            disabled={actionLoading || child.status !== 'checked_in'}
-          >
-            {actionLoading && child.status === 'checked_in' ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <>
-                <Text style={styles.buttonIcon}>✗</Text>
-                <Text style={styles.buttonText}>Stempel ut</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  styles.checkOutButton,
+                  (actionLoading === child.id || child.status !== 'checked_in') && styles.buttonDisabled
+                ]}
+                onPress={() => handleCheckOut(child)}
+                disabled={actionLoading === child.id || child.status !== 'checked_in'}
+              >
+                {actionLoading === child.id && child.status === 'checked_in' ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Text style={styles.buttonIcon}>✗</Text>
+                    <Text style={styles.buttonText}>Ut</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
       </View>
 
       {activities.length > 0 && (
@@ -268,26 +255,42 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textTransform: 'capitalize',
   },
+  childrenSection: {
+    padding: 15,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
   childCard: {
     backgroundColor: 'white',
-    padding: 20,
-    marginTop: 15,
+    padding: 15,
+    marginBottom: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   childHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 12,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: 12,
   },
   avatarText: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: 'white',
   },
@@ -295,19 +298,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   childName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
   childGroup: {
     fontSize: 14,
     color: '#666',
-    marginTop: 4,
+    marginTop: 2,
+  },
+  timeText: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
   statusIn: {
     backgroundColor: '#d4edda',
@@ -319,48 +327,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8d7da',
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-  },
-  timeInfo: {
-    flexDirection: 'row',
-    marginTop: 15,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  timeLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  timeValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  actionsCard: {
-    backgroundColor: 'white',
-    padding: 20,
-    marginTop: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   actionButton: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    gap: 6,
   },
   checkInButton: {
     backgroundColor: '#34C759',
@@ -373,20 +354,22 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonIcon: {
-    fontSize: 20,
+    fontSize: 16,
     color: 'white',
     fontWeight: 'bold',
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   activitiesCard: {
     backgroundColor: 'white',
     padding: 20,
-    marginTop: 15,
+    marginTop: 5,
     marginBottom: 20,
+    marginHorizontal: 15,
+    borderRadius: 12,
   },
   activityItem: {
     padding: 15,

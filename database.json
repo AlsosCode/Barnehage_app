@@ -10,9 +10,9 @@
         "Nøtter",
         "Egg"
       ],
-      "status": "checked_in",
+      "status": "checked_out",
       "checkedInAt": "2025-12-02T09:53:02.108Z",
-      "checkedOutAt": null,
+      "checkedOutAt": "2025-12-02T10:03:11.658Z",
       "parentId": 1
     },
     {
@@ -23,8 +23,8 @@
       "group": "Blå gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-02T07:45:00Z",
-      "checkedOutAt": "2025-12-02T15:30:00Z",
+      "checkedInAt": "2025-12-02T10:02:35.132Z",
+      "checkedOutAt": "2025-12-02T10:03:04.693Z",
       "parentId": 2
     },
     {
@@ -34,10 +34,74 @@
       "age": 3,
       "group": "Blå gruppe",
       "allergies": [],
-      "status": "home",
-      "checkedInAt": null,
-      "checkedOutAt": null,
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T10:02:36.041Z",
+      "checkedOutAt": "2025-12-02T10:03:05.268Z",
       "parentId": 3
+    },
+    {
+      "id": 4,
+      "name": "Olivia Berg",
+      "birthDate": "2021-09-05",
+      "age": 4,
+      "group": "Blå gruppe",
+      "allergies": [
+        "Laktose"
+      ],
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T08:30:00Z",
+      "checkedOutAt": "2025-12-02T10:03:05.900Z",
+      "parentId": 4
+    },
+    {
+      "id": 5,
+      "name": "Lucas Nilsen",
+      "birthDate": "2021-11-22",
+      "age": 3,
+      "group": "Blå gruppe",
+      "allergies": [],
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T10:02:37.926Z",
+      "checkedOutAt": "2025-12-02T10:03:06.462Z",
+      "parentId": 5
+    },
+    {
+      "id": 6,
+      "name": "Maja Pedersen",
+      "birthDate": "2022-02-14",
+      "age": 3,
+      "group": "Rød gruppe",
+      "allergies": [],
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T07:50:00Z",
+      "checkedOutAt": "2025-12-02T10:03:07.024Z",
+      "parentId": 6
+    },
+    {
+      "id": 7,
+      "name": "Elias Larsen",
+      "birthDate": "2021-04-30",
+      "age": 4,
+      "group": "Rød gruppe",
+      "allergies": [
+        "Gluten"
+      ],
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T08:00:00Z",
+      "checkedOutAt": "2025-12-02T10:03:07.531Z",
+      "parentId": 7
+    },
+    {
+      "id": 8,
+      "name": "Sara Kristiansen",
+      "birthDate": "2022-06-18",
+      "age": 3,
+      "group": "Rød gruppe",
+      "allergies": [],
+      "status": "checked_out",
+      "checkedInAt": "2025-12-02T10:02:40.295Z",
+      "checkedOutAt": "2025-12-02T10:03:08.017Z",
+      "parentId": 8
     }
   ],
   "parents": [
@@ -70,6 +134,56 @@
       "childrenIds": [
         3
       ]
+    },
+    {
+      "id": 4,
+      "name": "Martin Berg",
+      "email": "martin.berg@example.com",
+      "phone": "99887766",
+      "address": "Parkveien 7, Oslo",
+      "childrenIds": [
+        4
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Anne Nilsen",
+      "email": "anne.nilsen@example.com",
+      "phone": "44556677",
+      "address": "Bjørnveien 3, Bergen",
+      "childrenIds": [
+        5
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Tom Pedersen",
+      "email": "tom.pedersen@example.com",
+      "phone": "33445566",
+      "address": "Rosegata 15, Stavanger",
+      "childrenIds": [
+        6
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Linda Larsen",
+      "email": "linda.larsen@example.com",
+      "phone": "22334455",
+      "address": "Solveien 9, Tromsø",
+      "childrenIds": [
+        7
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Erik Kristiansen",
+      "email": "erik.kristiansen@example.com",
+      "phone": "55667788",
+      "address": "Måkeveien 11, Kristiansand",
+      "childrenIds": [
+        8
+      ]
     }
   ],
   "activities": [
@@ -97,7 +211,13 @@
       "id": 1,
       "name": "Blå gruppe",
       "totalCapacity": 12,
-      "currentCount": 1
+      "currentCount": 5
+    },
+    {
+      "id": 2,
+      "name": "Rød gruppe",
+      "totalCapacity": 10,
+      "currentCount": 3
     }
   ]
 }
