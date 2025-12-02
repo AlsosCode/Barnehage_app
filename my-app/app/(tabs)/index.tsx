@@ -1,98 +1,439 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import api, { Child, Activity } from '@/services/api';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [child, setChild] = useState<Child | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Hent første barn (for demo)
+      const children = await api.children.getAll();
+      if (children.length > 0) {
+        const childData = children[0];
+        setChild(childData);
+
+        // Hent aktiviteter for barnets gruppe
+        const activitiesData = await api.activities.getAll(childData.group);
+        setActivities(activitiesData.slice(0, 3)); // Vis bare de 3 siste
+      }
+    } catch (err) {
+      console.error('Error fetching home data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (!child) return;
+
+    if (child.status === 'checked_in') {
+      Alert.alert('Info', `${child.name} er allerede sjekket inn.`);
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      await api.children.checkIn(child.id);
+      Alert.alert('Suksess', `${child.name} er sjekket inn!`);
+      await fetchData();
+    } catch (err) {
+      Alert.alert('Feil', 'Kunne ikke sjekke inn. Prøv igjen.');
+      console.error('Check in error:', err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    if (!child) return;
+
+    if (child.status === 'checked_out') {
+      Alert.alert('Info', `${child.name} er allerede sjekket ut.`);
+      return;
+    }
+
+    if (child.status === 'home') {
+      Alert.alert('Info', `${child.name} er ikke sjekket inn ennå.`);
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      await api.children.checkOut(child.id);
+      Alert.alert('Suksess', `${child.name} er sjekket ut!`);
+      await fetchData();
+    } catch (err) {
+      Alert.alert('Feil', 'Kunne ikke sjekke ut. Prøv igjen.');
+      console.error('Check out error:', err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('nb-NO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const isToday = date.toDateString() === today.toDateString();
+
+    if (isToday) {
+      return 'I dag';
+    }
+
+    return date.toLocaleDateString('nb-NO', {
+      day: 'numeric',
+      month: 'short'
+    });
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Laster...</Text>
+      </View>
+    );
+  }
+
+  if (!child) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>Ingen barneinformasjon tilgjengelig</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchData}>
+          <Text style={styles.retryText}>Prøv igjen</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const getCurrentDate = () => {
+    const date = new Date();
+    return date.toLocaleDateString('nb-NO', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>Hjem</Text>
+        <Text style={styles.date}>{getCurrentDate()}</Text>
+      </View>
+
+      <View style={styles.childCard}>
+        <View style={styles.childHeader}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
+          </View>
+          <View style={styles.childDetails}>
+            <Text style={styles.childName}>{child.name}</Text>
+            <Text style={styles.childGroup}>{child.group}</Text>
+          </View>
+          <View style={[
+            styles.statusBadge,
+            child.status === 'checked_in' && styles.statusIn,
+            child.status === 'checked_out' && styles.statusOut,
+            child.status === 'home' && styles.statusHome
+          ]}>
+            <Text style={styles.statusText}>
+              {child.status === 'checked_in' && '✓ Inne'}
+              {child.status === 'checked_out' && '✓ Ute'}
+              {child.status === 'home' && 'Hjemme'}
+            </Text>
+          </View>
+        </View>
+
+        {child.checkedInAt && (
+          <View style={styles.timeInfo}>
+            <Text style={styles.timeLabel}>Sjekket inn: </Text>
+            <Text style={styles.timeValue}>{formatTime(child.checkedInAt)}</Text>
+          </View>
+        )}
+        {child.checkedOutAt && (
+          <View style={styles.timeInfo}>
+            <Text style={styles.timeLabel}>Sjekket ut: </Text>
+            <Text style={styles.timeValue}>{formatTime(child.checkedOutAt)}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.actionsCard}>
+        <Text style={styles.sectionTitle}>Stempling</Text>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.checkInButton,
+              (actionLoading || child.status === 'checked_in') && styles.buttonDisabled
+            ]}
+            onPress={handleCheckIn}
+            disabled={actionLoading || child.status === 'checked_in'}
+          >
+            {actionLoading && child.status !== 'checked_in' ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <>
+                <Text style={styles.buttonIcon}>✓</Text>
+                <Text style={styles.buttonText}>Stempel inn</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.checkOutButton,
+              (actionLoading || child.status !== 'checked_in') && styles.buttonDisabled
+            ]}
+            onPress={handleCheckOut}
+            disabled={actionLoading || child.status !== 'checked_in'}
+          >
+            {actionLoading && child.status === 'checked_in' ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <>
+                <Text style={styles.buttonIcon}>✗</Text>
+                <Text style={styles.buttonText}>Stempel ut</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {activities.length > 0 && (
+        <View style={styles.activitiesCard}>
+          <Text style={styles.sectionTitle}>Siste aktiviteter</Text>
+          {activities.map(activity => (
+            <View key={activity.id} style={styles.activityItem}>
+              <View style={styles.activityHeader}>
+                <Text style={styles.activityTitle}>{activity.title}</Text>
+                <Text style={styles.activityDate}>{formatDate(activity.createdAt)}</Text>
+              </View>
+              <Text style={styles.activityDescription} numberOfLines={2}>
+                {activity.description}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  header: {
+    backgroundColor: 'white',
+    padding: 20,
+    paddingTop: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  greeting: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  date: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 5,
+    textTransform: 'capitalize',
+  },
+  childCard: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 15,
+  },
+  childHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  avatarText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  childDetails: {
+    flex: 1,
+  },
+  childName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  childGroup: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  statusIn: {
+    backgroundColor: '#d4edda',
+  },
+  statusOut: {
+    backgroundColor: '#fff3cd',
+  },
+  statusHome: {
+    backgroundColor: '#f8d7da',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  timeInfo: {
+    flexDirection: 'row',
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  timeLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  timeValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  actionsCard: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
+  checkInButton: {
+    backgroundColor: '#34C759',
+  },
+  checkOutButton: {
+    backgroundColor: '#FF9500',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.6,
+  },
+  buttonIcon: {
+    fontSize: 20,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  activitiesCard: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 15,
+    marginBottom: 20,
+  },
+  activityItem: {
+    padding: 15,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  activityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  activityTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    flex: 1,
+  },
+  activityDate: {
+    fontSize: 12,
+    color: '#666',
+  },
+  activityDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 10,
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
