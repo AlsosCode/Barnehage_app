@@ -7,7 +7,7 @@ export default function HomeScreen() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-
+  
   useEffect(() => {
     fetchData();
   }, []);

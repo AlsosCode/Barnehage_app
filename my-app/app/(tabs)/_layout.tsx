@@ -71,6 +71,17 @@ export default function TabLayout() {
           ),
         }}
       />
-    </Tabs>
+
+      {/*Check-In */}
+      <Tabs.Screen
+        name="checkin"
+        options={{
+          title: 'Check-in',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="clock.fill" color={color} />
+          ),
+        }}
+    />
+  /</Tabs>
   );
 }

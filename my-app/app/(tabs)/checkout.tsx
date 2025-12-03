@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 import api, { Child } from "@/services/api";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
+
 
 export default function CheckOutScreen() {
   const [children, setChildren] = useState<Child[]>([]);
@@ -8,9 +11,11 @@ export default function CheckOutScreen() {
   const [error, setError] = useState<string | null>(null);
 
   // Hent barn fra backend
-  useEffect(() => {
-    fetchChildren();
-  }, []);
+  useFocusEffect(
+          useCallback(() =>{
+              fetchChildren();
+          }, [])
+      );
 
   const fetchChildren = async () => {
     try {

@@ -10,9 +10,9 @@
         "Nøtter",
         "Egg"
       ],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-02T09:53:02.108Z",
-      "checkedOutAt": "2025-12-02T10:03:11.658Z",
+      "status": "checked_in",
+      "checkedInAt": "2025-12-03T10:23:25.491Z",
+      "checkedOutAt": null,
       "parentId": 1
     },
     {
@@ -22,9 +22,9 @@
       "age": 4,
       "group": "Blå gruppe",
       "allergies": [],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-02T10:02:35.132Z",
-      "checkedOutAt": "2025-12-02T10:03:04.693Z",
+      "status": "checked_in",
+      "checkedInAt": "2025-12-03T10:23:34.976Z",
+      "checkedOutAt": null,
       "parentId": 2
     },
     {
@@ -34,9 +34,9 @@
       "age": 3,
       "group": "Blå gruppe",
       "allergies": [],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-02T10:02:36.041Z",
-      "checkedOutAt": "2025-12-02T10:03:05.268Z",
+      "status": "checked_in",
+      "checkedInAt": "2025-12-03T10:25:25.980Z",
+      "checkedOutAt": null,
       "parentId": 3
     },
     {
@@ -48,9 +48,9 @@
       "allergies": [
         "Laktose"
       ],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-02T08:30:00Z",
-      "checkedOutAt": "2025-12-02T10:03:05.900Z",
+      "status": "checked_in",
+      "checkedInAt": "2025-12-03T10:25:30.396Z",
+      "checkedOutAt": null,
       "parentId": 4
     },
     {
@@ -61,8 +61,8 @@
       "group": "Blå gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-02T10:02:37.926Z",
-      "checkedOutAt": "2025-12-02T10:03:06.462Z",
+      "checkedInAt": "2025-12-03T10:08:36.994Z",
+      "checkedOutAt": "2025-12-03T10:15:26.214Z",
       "parentId": 5
     },
     {
@@ -73,8 +73,8 @@
       "group": "Rød gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-02T07:50:00Z",
-      "checkedOutAt": "2025-12-02T10:03:07.024Z",
+      "checkedInAt": "2025-12-03T10:08:38.218Z",
+      "checkedOutAt": "2025-12-03T10:12:29.160Z",
       "parentId": 6
     },
     {
@@ -87,8 +87,8 @@
         "Gluten"
       ],
       "status": "checked_out",
-      "checkedInAt": "2025-12-02T08:00:00Z",
-      "checkedOutAt": "2025-12-02T10:03:07.531Z",
+      "checkedInAt": "2025-12-03T10:08:38.960Z",
+      "checkedOutAt": "2025-12-03T10:15:28.026Z",
       "parentId": 7
     },
     {
@@ -99,8 +99,8 @@
       "group": "Rød gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-02T10:02:40.295Z",
-      "checkedOutAt": "2025-12-02T10:03:08.017Z",
+      "checkedInAt": "2025-12-03T10:08:44.913Z",
+      "checkedOutAt": "2025-12-03T10:12:26.746Z",
       "parentId": 8
     }
   ],
