@@ -113,7 +113,8 @@
       "address": "Storgata 1, Oslo",
       "childrenIds": [
         1
-      ]
+      ],
+      "verified": true
     },
     {
       "id": 2,
@@ -123,7 +124,8 @@
       "address": "Lille vei 5, Bergen",
       "childrenIds": [
         2
-      ]
+      ],
+      "verified": true
     },
     {
       "id": 3,
@@ -133,7 +135,8 @@
       "address": "Haugeveien 12, Trondheim",
       "childrenIds": [
         3
-      ]
+      ],
+      "verified": true
     },
     {
       "id": 4,
@@ -143,7 +146,8 @@
       "address": "Parkveien 7, Oslo",
       "childrenIds": [
         4
-      ]
+      ],
+      "verified": true
     },
     {
       "id": 5,

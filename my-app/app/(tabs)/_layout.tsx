@@ -82,6 +82,16 @@ export default function TabLayout() {
           ),
         }}
     />
-  /</Tabs>
+
+    <Tabs.Screen
+      name="identity"
+      options={{
+        title: "Identity",
+        tabBarIcon: ({ color }) => (
+          <IconSymbol name="person.fill.checkmark" size={28} color={color} />
+        ),
+      }}
+      />
+  </Tabs>
   );
 }

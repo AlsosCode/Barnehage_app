@@ -26,6 +26,7 @@ export interface Parent {
   phone: string;
   address: string;
   childrenIds: number[];
+  verified?: boolean;
 }
 
 export interface Activity {
