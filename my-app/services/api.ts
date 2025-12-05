@@ -1,8 +1,7 @@
 // API Configuration
 // API Configuration
 // API Configuration
-const API_BASE_URL =
-  'https://potential-adventure-r6w7v655w972566v-3002.app.github.dev/api';
+const API_BASE_URL = 'http://localhost:3002/api
 
 
 
