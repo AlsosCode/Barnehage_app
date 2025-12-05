@@ -1,4 +1,16 @@
 {
-  "compilerOptions": {},
-  "extends": "expo/tsconfig.base"
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "strict": false,
+    "noEmit": true
+  },
+  "include": [
+    "server.js",
+    "routes/**/*.js",
+    "utils/**/*.js"
+  ]
 }

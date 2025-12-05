@@ -1,5 +1,10 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:3002/api';
+// API Configuration
+// API Configuration
+const API_BASE_URL =
+  'https://potential-adventure-r6w7v655w972566v-3002.app.github.dev/api';
+
+
 
 // For testing on physical device or emulator, use your computer's IP address:
 // const API_BASE_URL = 'http://10.0.0.61:3002/api';
