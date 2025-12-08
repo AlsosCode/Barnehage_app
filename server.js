@@ -2,10 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 // Import routes
-const childrenRoutes = require('./routes/children');
-const parentsRoutes = require('./routes/parents');
-const activitiesRoutes = require('./routes/activities');
-const statsRoutes = require('./routes/stats');
+const childrenRoutes = require("./routes/children");
+const parentsRoutes = require("./routes/parents");
+const activitiesRoutes = require("./routes/activities");
+const statsRoutes = require("./routes/stats");
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -35,34 +35,34 @@ app.use((req, res, next) => {
 });
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.json({
-    message: 'Barnehage API',
-    version: '1.0.0',
+    message: "Barnehage API",
+    version: "1.0.0",
     endpoints: {
-      children: '/api/children',
-      parents: '/api/parents',
-      activities: '/api/activities',
-      stats: '/api/stats'
-    }
+      children: "/api/children",
+      parents: "/api/parents",
+      activities: "/api/activities",
+      stats: "/api/stats",
+    },
   });
 });
 
 // API Routes
-app.use('/api/children', childrenRoutes);
-app.use('/api/parents', parentsRoutes);
-app.use('/api/activities', activitiesRoutes);
-app.use('/api/stats', statsRoutes);
+app.use("/api/children", childrenRoutes);
+app.use("/api/parents", parentsRoutes);
+app.use("/api/activities", activitiesRoutes);
+app.use("/api/stats", statsRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ error: "Route not found" });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  console.error("Error:", err);
+  res.status(500).json({ error: "Internal server error" });
 });
 
 // Start server on all network interfaces (⚡ viktig i Codespaces!)
@@ -87,3 +87,17 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 module.exports = app;
+
+// Kobler til transferRoutes.js
+
+const express = require("express");
+const bodyParser = require("body-parser");
+const transferRoutes = require("./routes/transferRoutes");
+
+//const app = express(); Står høyere opp i koden
+app.use(bodyParser.json());
+
+app.use("/api", transferRoutes);
+
+const PORT = 3000;
+app.listen(PORT, () => console.log("Server running on port ${PORT"));
