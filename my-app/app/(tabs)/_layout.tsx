@@ -61,7 +61,7 @@ export default function TabLayout() {
         }}
       />
 
-            {/* Check-out/tab 3 */}
+      {/* Check-out */}
       <Tabs.Screen
         name="checkout"
         options={{
@@ -72,7 +72,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Check-In */}
+      {/* Check-in */}
       <Tabs.Screen
         name="checkin"
         options={{
@@ -83,7 +83,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Ny aktivitet / nytt innlegg */}
+      {/* Ny aktivitet */}
       <Tabs.Screen
         name="createActivity"
         options={{
@@ -94,6 +94,7 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Identity */}
       <Tabs.Screen
         name="identity"
         options={{
@@ -104,6 +105,21 @@ export default function TabLayout() {
         }}
       />
 
-  </Tabs>
+      {/* Ny forelderprofil */}
+      <Tabs.Screen
+        name="createParent"
+        options={{
+          title: 'Ny forelder',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol
+              size={28}
+              name="person.crop.circle.badge.plus"
+              color={color}
+            />
+          ),
+        }}
+      />
+
+    </Tabs>
   );
 }

@@ -25,6 +25,29 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /api/parents - Opprett ny forelder
+router.post('/', async (req, res) => {
+  try {
+    const { name, email, phone, childrenIds } = req.body;
+
+    if (!name || !email || !phone) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const newParent = await db.createParent({
+      name,
+      email,
+      phone,
+      childrenIds: childrenIds || []
+    });
+
+    res.status(201).json(newParent);
+  } catch (error) {
+    console.error("Create parent error:", error);
+    res.status(500).json({ error: "Failed to create parent" });
+  }
+});
+
 // PUT /api/parents/:id - Oppdater forelder info
 router.put('/:id', async (req, res) => {
   try {
@@ -38,7 +61,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// GET /api/parents/:id/children - Hent alle barn for en forelder
+// GET /api/parents/:id/children - Hent barn for forelder
 router.get('/:id/children', async (req, res) => {
   try {
     const parent = await db.getParentById(req.params.id);
