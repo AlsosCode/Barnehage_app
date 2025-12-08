@@ -35,8 +35,8 @@
       "group": "Blå gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-03T10:25:25.980Z",
-      "checkedOutAt": "2025-12-08T07:52:59.417Z",
+      "checkedInAt": "2025-12-08T12:06:52.810Z",
+      "checkedOutAt": "2025-12-08T12:06:57.962Z",
       "parentId": 3
     },
     {
@@ -67,15 +67,15 @@
     },
     {
       "id": 6,
-      "name": "Maja Pedersen",
+      "name": "Maja Hansen",
       "birthDate": "2022-02-14",
-      "age": 3,
+      "age": 2,
       "group": "Rød gruppe",
       "allergies": [],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-08T07:51:43.553Z",
-      "checkedOutAt": "2025-12-08T07:52:57.800Z",
-      "parentId": 6
+      "status": "home",
+      "checkedInAt": null,
+      "checkedOutAt": null,
+      "parentId": 1
     },
     {
       "id": 7,
@@ -112,7 +112,8 @@
       "phone": "12345678",
       "address": "Storgata 1, Oslo",
       "childrenIds": [
-        1
+        1,
+        6
       ],
       "verified": true
     },

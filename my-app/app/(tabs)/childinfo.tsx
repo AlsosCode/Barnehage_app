@@ -1,29 +1,30 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import api, { Child } from "@/services/api";
 
 export default function ChildInfoScreen() {
   const [child, setChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const params = useLocalSearchParams();
+  const router = useRouter();
+  const childId = params.childId ? parseInt(params.childId as string) : null;
 
-  // For demo: viser det første barnet i listen
-  // I en ekte app ville du brukt autentisering for å vise riktig barn
   useEffect(() => {
-    fetchChildInfo();
-  }, []);
+    if (childId) {
+      fetchChildInfo(childId);
+    } else {
+      setError('Ingen barn valgt');
+      setLoading(false);
+    }
+  }, [childId]);
 
-  const fetchChildInfo = async () => {
+  const fetchChildInfo = async (id: number) => {
     try {
       setLoading(true);
-      const children = await api.children.getAll();
-
-      // Hent første barn som eksempel (i ekte app: bruk innlogget foreldres barn)
-      if (children.length > 0) {
-        setChild(children[0]);
-      } else {
-        setError('Ingen barn funnet');
-      }
+      const fetchedChild = await api.children.getById(id);
+      setChild(fetchedChild);
       setError(null);
     } catch (err) {
       setError('Kunne ikke hente barnets informasjon. Sjekk at serveren kjører.');
@@ -46,9 +47,11 @@ export default function ChildInfoScreen() {
     return (
       <View style={[styles.container, styles.centered]}>
         <Text style={styles.errorText}>{error || 'Ingen barneinformasjon tilgjengelig'}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={fetchChildInfo}>
-          <Text style={styles.retryText}>Prøv igjen</Text>
-        </TouchableOpacity>
+        {childId && (
+          <TouchableOpacity style={styles.retryButton} onPress={() => fetchChildInfo(childId)}>
+            <Text style={styles.retryText}>Prøv igjen</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
@@ -64,6 +67,10 @@ export default function ChildInfoScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backButtonText}>← Tilbake</Text>
+      </TouchableOpacity>
+
       <View style={styles.profileSection}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
@@ -155,6 +162,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
   },
   profileSection: {
     backgroundColor: '#007AFF',
