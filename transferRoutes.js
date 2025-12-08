@@ -48,3 +48,23 @@ router.post("/transfer", (req, res) => {
 });
 
 module.exports = router;
+
+router.get("/pickup-today", (req, res) => {
+  const { date } = req.query;
+  const targetDate = date || new Date().toISOString().slice(0, 10);
+
+  const db = readDb();
+
+  const result = db.children.map((child) => {
+    const validAuths = (child.pickupAuthorizations || []).filter(
+      (auth) => auth.validDate === targetDate
+    );
+
+    return {
+      childId: child.id,
+      childName: child.name,
+      pickupAuthorizations: validAuths,
+    };
+  });
+  res.json(result);
+});
