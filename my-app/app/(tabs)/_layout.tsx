@@ -61,7 +61,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Check-out/tab 3 */}
+            {/* Check-out/tab 3 */}
       <Tabs.Screen
         name="checkout"
         options={{
@@ -72,7 +72,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/*Check-In */}
+      {/* Check-In */}
       <Tabs.Screen
         name="checkin"
         options={{
@@ -81,17 +81,29 @@ export default function TabLayout() {
             <IconSymbol size={28} name="clock.fill" color={color} />
           ),
         }}
-    />
-
-    <Tabs.Screen
-      name="identity"
-      options={{
-        title: "Identity",
-        tabBarIcon: ({ color }) => (
-          <IconSymbol name="person.fill.checkmark" size={28} color={color} />
-        ),
-      }}
       />
+
+      {/* Ny aktivitet / nytt innlegg */}
+      <Tabs.Screen
+        name="createActivity"
+        options={{
+          title: 'Nytt innlegg',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="square.and.pencil" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="identity"
+        options={{
+          title: 'Identity',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="person.fill.checkmark" size={28} color={color} />
+          ),
+        }}
+      />
+
   </Tabs>
   );
 }

@@ -1,6 +1,5 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
+const express = require('express');
+const bodyParser = require('body-parser');
 
 // Import routes
 const childrenRoutes = require("./routes/children");
@@ -11,12 +10,25 @@ const statsRoutes = require("./routes/stats");
 const app = express();
 const port = process.env.PORT || 3002;
 
-// Middleware
-app.use(cors()); // Tillat alle origins (for development)
-app.use(bodyParser.json()); // Parse JSON bodies
-app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
+// ----------------------------------------
+// CORS Middleware (fikser nettleser-blokkeringer)
+// ----------------------------------------
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // Tillat alle origins (OK for eksamen/dev)
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-// Logger middleware
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+// Body-Parsing Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Logging (vis forespørsler i terminal)
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
@@ -53,11 +65,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-// Start server on all network interfaces
-app.listen(port, "0.0.0.0", () => {
+// Start server on all network interfaces (⚡ viktig i Codespaces!)
+app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Barnehage API server running on http://0.0.0.0:${port}`);
-  console.log(`📱 Access from your device at http://10.0.0.61:${port}`);
-  console.log(`📚 Available endpoints:`);
+  console.log(`📱 Access from local device at http://localhost:${port}`);
+  console.log(`🌍 Public (Codespaces) URL via forwarded port`);
+  console.log(`📚 API Endpoints:`);
   console.log(`   - GET    /api/children`);
   console.log(`   - GET    /api/children/:id`);
   console.log(`   - PUT    /api/children/:id`);

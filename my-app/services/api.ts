@@ -1,6 +1,8 @@
 // API Configuration
 const API_BASE_URL = 'http://localhost:3002/api';
 
+
+
 // For testing on physical device or emulator, use your computer's IP address:
 // const API_BASE_URL = 'http://10.0.0.61:3002/api';
 // const API_BASE_URL = 'http://192.168.1.100:3002/api'; // Replace with your IP
