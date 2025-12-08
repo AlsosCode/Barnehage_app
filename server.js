@@ -6,6 +6,7 @@ const childrenRoutes = require("./routes/children");
 const parentsRoutes = require("./routes/parents");
 const activitiesRoutes = require("./routes/activities");
 const statsRoutes = require("./routes/stats");
+const transferRoutes = require("./routes/transferRoutes");
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -53,6 +54,7 @@ app.use("/api/children", childrenRoutes);
 app.use("/api/parents", parentsRoutes);
 app.use("/api/activities", activitiesRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api", transferRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -87,17 +89,3 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 module.exports = app;
-
-// Kobler til transferRoutes.js
-
-const express = require("express");
-const bodyParser = require("body-parser");
-const transferRoutes = require("./routes/transferRoutes");
-
-//const app = express(); Står høyere opp i koden
-app.use(bodyParser.json());
-
-app.use("/api", transferRoutes);
-
-const PORT = 3000;
-app.listen(PORT, () => console.log("Server running on port ${PORT"));
