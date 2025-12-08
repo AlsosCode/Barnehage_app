@@ -34,9 +34,9 @@
       "age": 3,
       "group": "Blå gruppe",
       "allergies": [],
-      "status": "checked_in",
+      "status": "checked_out",
       "checkedInAt": "2025-12-03T10:25:25.980Z",
-      "checkedOutAt": null,
+      "checkedOutAt": "2025-12-08T07:52:59.417Z",
       "parentId": 3
     },
     {
@@ -48,9 +48,9 @@
       "allergies": [
         "Laktose"
       ],
-      "status": "checked_in",
+      "status": "checked_out",
       "checkedInAt": "2025-12-03T10:25:30.396Z",
-      "checkedOutAt": null,
+      "checkedOutAt": "2025-12-08T07:52:58.881Z",
       "parentId": 4
     },
     {
@@ -61,8 +61,8 @@
       "group": "Blå gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-03T10:08:36.994Z",
-      "checkedOutAt": "2025-12-03T10:15:26.214Z",
+      "checkedInAt": "2025-12-08T07:51:42.876Z",
+      "checkedOutAt": "2025-12-08T07:52:58.340Z",
       "parentId": 5
     },
     {
@@ -73,8 +73,8 @@
       "group": "Rød gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-03T10:08:38.218Z",
-      "checkedOutAt": "2025-12-03T10:12:29.160Z",
+      "checkedInAt": "2025-12-08T07:51:43.553Z",
+      "checkedOutAt": "2025-12-08T07:52:57.800Z",
       "parentId": 6
     },
     {
@@ -87,8 +87,8 @@
         "Gluten"
       ],
       "status": "checked_out",
-      "checkedInAt": "2025-12-03T10:08:38.960Z",
-      "checkedOutAt": "2025-12-03T10:15:28.026Z",
+      "checkedInAt": "2025-12-08T07:52:00.167Z",
+      "checkedOutAt": "2025-12-08T07:52:57.278Z",
       "parentId": 7
     },
     {
@@ -99,8 +99,8 @@
       "group": "Rød gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-03T10:08:44.913Z",
-      "checkedOutAt": "2025-12-03T10:12:26.746Z",
+      "checkedInAt": "2025-12-08T07:52:02.393Z",
+      "checkedOutAt": "2025-12-08T07:52:56.734Z",
       "parentId": 8
     }
   ],
@@ -157,7 +157,8 @@
       "address": "Bjørnveien 3, Bergen",
       "childrenIds": [
         5
-      ]
+      ],
+      "verified": true
     },
     {
       "id": 6,
