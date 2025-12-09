@@ -6,10 +6,7 @@
       "birthDate": "2021-03-15",
       "age": 4,
       "group": "Blå gruppe",
-      "allergies": [
-        "Nøtter",
-        "Egg"
-      ],
+      "allergies": ["Nøtter", "Egg"],
       "status": "checked_out",
       "checkedInAt": "2025-12-03T10:23:25.491Z",
       "checkedOutAt": "2025-12-08T11:37:31.162Z",
@@ -34,9 +31,9 @@
       "age": 3,
       "group": "Blå gruppe",
       "allergies": [],
-      "status": "checked_in",
-      "checkedInAt": "2025-12-08T12:22:56.548Z",
-      "checkedOutAt": null,
+      "status": "checked_out",
+      "checkedInAt": "2025-12-08T12:06:52.810Z",
+      "checkedOutAt": "2025-12-08T12:06:57.962Z",
       "parentId": 3
     },
     {
@@ -45,9 +42,7 @@
       "birthDate": "2021-09-05",
       "age": 4,
       "group": "Blå gruppe",
-      "allergies": [
-        "Laktose"
-      ],
+      "allergies": ["Laktose"],
       "status": "checked_in",
       "checkedInAt": "2025-12-08T11:37:28.299Z",
       "checkedOutAt": null,
@@ -67,15 +62,15 @@
     },
     {
       "id": 6,
-      "name": "Maja Pedersen",
+      "name": "Maja Hansen",
       "birthDate": "2022-02-14",
-      "age": 3,
+      "age": 2,
       "group": "Rød gruppe",
       "allergies": [],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-08T07:51:43.553Z",
-      "checkedOutAt": "2025-12-08T07:52:57.800Z",
-      "parentId": 6
+      "status": "home",
+      "checkedInAt": null,
+      "checkedOutAt": null,
+      "parentId": 1
     },
     {
       "id": 7,
@@ -83,9 +78,7 @@
       "birthDate": "2021-04-30",
       "age": 4,
       "group": "Rød gruppe",
-      "allergies": [
-        "Gluten"
-      ],
+      "allergies": ["Gluten"],
       "status": "checked_out",
       "checkedInAt": "2025-12-08T07:52:00.167Z",
       "checkedOutAt": "2025-12-08T07:52:57.278Z",
@@ -111,9 +104,7 @@
       "email": "kari.hansen@example.com",
       "phone": "12345678",
       "address": "Storgata 1, Oslo",
-      "childrenIds": [
-        1
-      ],
+      "childrenIds": [1, 6],
       "verified": true
     },
     {
@@ -122,9 +113,7 @@
       "email": "per.johansen@example.com",
       "phone": "87654321",
       "address": "Lille vei 5, Bergen",
-      "childrenIds": [
-        2
-      ],
+      "childrenIds": [2],
       "verified": true
     },
     {
@@ -133,9 +122,7 @@
       "email": "sofia.andersen@example.com",
       "phone": "11223344",
       "address": "Haugeveien 12, Trondheim",
-      "childrenIds": [
-        3
-      ],
+      "childrenIds": [3],
       "verified": true
     },
     {
@@ -144,9 +131,7 @@
       "email": "martin.berg@example.com",
       "phone": "99887766",
       "address": "Parkveien 7, Oslo",
-      "childrenIds": [
-        4
-      ],
+      "childrenIds": [4],
       "verified": true
     },
     {
@@ -155,9 +140,7 @@
       "email": "anne.nilsen@example.com",
       "phone": "44556677",
       "address": "Bjørnveien 3, Bergen",
-      "childrenIds": [
-        5
-      ],
+      "childrenIds": [5],
       "verified": true
     },
     {
@@ -166,9 +149,7 @@
       "email": "tom.pedersen@example.com",
       "phone": "33445566",
       "address": "Rosegata 15, Stavanger",
-      "childrenIds": [
-        6
-      ],
+      "childrenIds": [6],
       "verified": true
     },
     {
@@ -177,9 +158,7 @@
       "email": "linda.larsen@example.com",
       "phone": "22334455",
       "address": "Solveien 9, Tromsø",
-      "childrenIds": [
-        7
-      ],
+      "childrenIds": [7],
       "verified": true
     },
     {
@@ -188,9 +167,7 @@
       "email": "erik.kristiansen@example.com",
       "phone": "55667788",
       "address": "Måkeveien 11, Kristiansand",
-      "childrenIds": [
-        8
-      ]
+      "childrenIds": [8]
     },
     {
       "id": 9,

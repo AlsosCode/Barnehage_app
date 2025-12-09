@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { useRouter } from "expo-router";
 import api, { Parent } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function EditInfoScreen() {
   const [parent, setParent] = useState<Parent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   // Form fields
   const [name, setName] = useState("");
@@ -103,79 +107,91 @@ export default function EditInfoScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Redigere kontaktinfo</Text>
-      <Text style={styles.subtitle}>Oppdater din kontaktinformasjon</Text>
-
-      <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Navn</Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            style={styles.input}
-            placeholder="Ditt navn"
-            placeholderTextColor="#999"
-          />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Kontaktinfo</Text>
+          <Text style={styles.subtitle}>Oppdater din kontaktinformasjon</Text>
         </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>E-post</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            placeholder="din@epost.no"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Telefon</Text>
-          <TextInput
-            value={phone}
-            onChangeText={setPhone}
-            style={styles.input}
-            placeholder="12345678"
-            keyboardType="phone-pad"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Adresse</Text>
-          <TextInput
-            value={address}
-            onChangeText={setAddress}
-            style={[styles.input, styles.textArea]}
-            placeholder="Din adresse"
-            multiline
-            numberOfLines={3}
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        <TouchableOpacity
-          style={[styles.button, saving && styles.buttonDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator size="small" color="white" />
-          ) : (
-            <Text style={styles.buttonText}>Lagre endringer</Text>
-          )}
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {
+          logout();
+          router.replace('/login' as any);
+        }}>
+          <Text style={styles.logoutText}>Logg ut</Text>
         </TouchableOpacity>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.infoText}>
-            ℹ️ Denne informasjonen brukes av barnehagen for å kontakte deg.
-          </Text>
-        </View>
       </View>
-    </ScrollView>
+
+      <ScrollView style={styles.content}>
+        <View style={styles.form}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Navn</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              style={styles.input}
+              placeholder="Ditt navn"
+              placeholderTextColor="#999"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>E-post</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              style={styles.input}
+              placeholder="din@epost.no"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholderTextColor="#999"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Telefon</Text>
+            <TextInput
+              value={phone}
+              onChangeText={setPhone}
+              style={styles.input}
+              placeholder="12345678"
+              keyboardType="phone-pad"
+              placeholderTextColor="#999"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Adresse</Text>
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              style={[styles.input, styles.textArea]}
+              placeholder="Din adresse"
+              multiline
+              numberOfLines={3}
+              placeholderTextColor="#999"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.button, saving && styles.buttonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <Text style={styles.buttonText}>Lagre endringer</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              ℹ️ Denne informasjonen brukes av barnehagen for å kontakte deg.
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -189,24 +205,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  header: {
+    backgroundColor: '#003366',
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  logoutText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 10,
-    marginTop: 20,
-    marginHorizontal: 20,
-    color: '#333',
+    color: 'white',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
-    marginHorizontal: 20,
+    color: 'white',
+    marginTop: 5,
+  },
+  content: {
+    flex: 1,
   },
   form: {
     backgroundColor: 'white',
     padding: 20,
-    marginTop: 10,
+    margin: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   inputGroup: {
     marginBottom: 20,
@@ -230,9 +272,9 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: '#003366',
+    padding: 18,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,
   },

@@ -13,6 +13,9 @@ function writeDb(data) {
   fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
 }
 
+// --------------------------------------------------
+// POST /api/transfer  –  Lagre hentetillatelse
+// --------------------------------------------------
 router.post("/transfer", (req, res) => {
   const { childId, name, relation, phone, validDate, createdByParentId } =
     req.body;
@@ -47,8 +50,9 @@ router.post("/transfer", (req, res) => {
   res.status(201).json(newAuth);
 });
 
-module.exports = router;
-
+// --------------------------------------------------
+// GET /api/pickup-today – Hent dagens godkjente henting
+// --------------------------------------------------
 router.get("/pickup-today", (req, res) => {
   const { date } = req.query;
   const targetDate = date || new Date().toISOString().slice(0, 10);
@@ -66,5 +70,8 @@ router.get("/pickup-today", (req, res) => {
       pickupAuthorizations: validAuths,
     };
   });
+
   res.json(result);
 });
+
+module.exports = router;
