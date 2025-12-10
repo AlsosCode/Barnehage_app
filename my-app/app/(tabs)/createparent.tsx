@@ -1,141 +1,84 @@
-import { useState } from "react";
-import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,} from "react-native";
-import api from "@/services/api";
-export default function CreateParentScreen() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-  });
+import { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 
-  const handleChange = (field: string, value: string) => {
-    setForm({ ...form, [field]: value });
-  };
+export default function CreateParent() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
-  const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.phone) {
-      Alert.alert("Feil", "Vennligst fyll ut alle påkrevde felt.");
-      return;
-    }
+  async function submit() {
+    console.log("👉 Submit pressed");
 
     try {
-      await api.parents.create(form);
-      Alert.alert("Suksess!", "Foreldreprofil er opprettet.");
-
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
+      const res = await fetch("http://localhost:3002/api/parents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          childrenIds: []
+        })
       });
+
+      const data = await res.json();
+      console.log("📩 Server response:", data);
+
+      if (res.ok) {
+        console.log("✅ Forelder ble opprettet!");
+        setName("");
+        setEmail("");
+        setPhone("");
+      } else {
+        console.log("❌ Feil ved opprettelse:", data);
+      }
+
     } catch (err) {
-      Alert.alert("Feil", "Kunne ikke opprette forelder.");
-      console.error(err);
+      console.log("🚨 Serverfeil:", err);
     }
-  };
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Opprett foreldreprofil</Text>
-        <Text style={styles.subtitle}>Fyll ut informasjonen nedenfor.</Text>
-      </View>
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, marginBottom: 20 }}>Opprett forelder</Text>
 
-      <View style={styles.formCard}>
-        <Text style={styles.label}>Navn *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="F.eks. Kari Nordmann"
-          value={form.name}
-          onChangeText={(v) => handleChange("name", v)}
-        />
+      <Text>Navn</Text>
+      <TextInput
+        style={{ borderWidth: 1, marginBottom: 10, padding: 8 }}
+        value={name}
+        onChangeText={setName}
+        placeholder="F.eks. Kari Hansen"
+      />
 
-        <Text style={styles.label}>E-post *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="kari@epost.no"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={form.email}
-          onChangeText={(v) => handleChange("email", v)}
-        />
+      <Text>E-post</Text>
+      <TextInput
+        style={{ borderWidth: 1, marginBottom: 10, padding: 8 }}
+        value={email}
+        onChangeText={setEmail}
+        placeholder="epost@example.com"
+      />
 
-        <Text style={styles.label}>Telefon *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="12345678"
-          keyboardType="phone-pad"
-          value={form.phone}
-          onChangeText={(v) => handleChange("phone", v)}
-        />
+      <Text>Telefon</Text>
+      <TextInput
+        style={{ borderWidth: 1, marginBottom: 10, padding: 8 }}
+        value={phone}
+        onChangeText={setPhone}
+        placeholder="12345678"
+      />
 
-        <Text style={styles.label}>Adresse</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Gateadresse"
-          value={form.address}
-          onChangeText={(v) => handleChange("address", v)}
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Opprett forelder</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      <TouchableOpacity
+        onPress={submit}
+        style={{
+          backgroundColor: "dodgerblue",
+          padding: 15,
+          borderRadius: 6,
+          marginTop: 20
+        }}
+      >
+        <Text style={{ color: "white", fontSize: 18, textAlign: "center" }}>
+          Opprett forelder
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-
-  header: {
-    padding: 20,
-    paddingTop: 50,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-
-  title: { fontSize: 28, fontWeight: "bold", color: "#333" },
-  subtitle: { fontSize: 16, color: "#666", marginTop: 6 },
-
-  formCard: {
-    margin: 20,
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 15,
-    marginBottom: 5,
-  },
-
-  input: {
-    backgroundColor: "#eee",
-    padding: 14,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 10,
-    marginTop: 30,
-  },
-
-  buttonText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});

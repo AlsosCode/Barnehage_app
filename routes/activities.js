@@ -2,10 +2,16 @@ const express = require('express');
 const router = express.Router();
 const db = require('../utils/db');
 
+// Enkel funksjon som rengjør teksten
+function clean(value) {
+  if (!value) return "";
+  return String(value).trim().replace(/[<>]/g, "");
+}
+
 // GET /api/activities - Hent alle aktiviteter
 router.get('/', async (req, res) => {
   try {
-    const { group } = req.query;
+    const group = clean(req.query.group)
 
     if (group) {
       const activities = await db.getActivitiesByGroup(group);
@@ -22,7 +28,11 @@ router.get('/', async (req, res) => {
 // POST /api/activities - Legg til ny aktivitet
 router.post('/', async (req, res) => {
   try {
-    const { title, description, imageUrl, group } = req.body;
+    // GDPR-tillegg: renser alle felter
+    const title = clean(req.body.title);
+    const description = clean(req.body.description);
+    const imageUrl = clean(req.body.imageUrl);
+    const group = clean(req.body. group);
 
     if (!title || !description) {
       return res.status(400).json({ error: 'Title and description are required' });

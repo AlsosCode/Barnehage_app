@@ -5,6 +5,12 @@ const path = require("path");
 const router = express.Router();
 const dbPath = path.join(__dirname, "..", "database.json");
 
+// Enkel funksjon som rengjør teksten
+function clean(value) {
+  if (!value) return "";
+  return String(value).trim().replace(/[<>]/g, "");
+}
+
 function readDb() {
   return JSON.parse(fs.readFileSync(dbPath, "utf8"));
 }
@@ -17,20 +23,24 @@ function writeDb(data) {
 // POST /api/transfer  –  Lagre hentetillatelse
 // --------------------------------------------------
 router.post("/transfer", (req, res) => {
-  const { childId, name, relation, phone, validDate, createdByParentId } =
-    req.body;
+  const db = readDb();
+
+  // Renser input
+
+  const childId = clean(req.body.childId);
+  const name = clean(req.body.name);
+  const relation = clean(req.body.relation);
+  const phone = clean(req.body.phone);
+  const validDate = clean(req.body.validDate)
+  const createdByParentId= clean(req.body.createdByParentId);
 
   if (!childId || !name || !validDate) {
     return res.status(400).json({ error: "Mangler påkrevde felter" });
   }
 
-  const db = readDb();
   const child = db.children.find((c) => c.id === childId);
-
-  if (!child) {
-    return res.status(404).json({ error: "Barn ikke funnet" });
-  }
-
+  if (!child) return res.status(404).json({ error: "Barn ikke funnet" });
+  
   const newAuth = {
     id: Date.now(),
     name,

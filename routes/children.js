@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const db = require('../utils/db');
 
+// Enkel funksjon som rengjør teksten
+function clean(value) {
+  if (!value) return "";
+  return String(value).trim().replace(/[<>]/g, "");
+}
+
 // GET /api/children - Hent alle barn
 router.get('/', async (req, res) => {
   try {
@@ -25,10 +31,19 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/children/:id - Oppdater barn
+// PUT /api/children/:id - Oppdaterer barn
 router.put('/:id', async (req, res) => {
   try {
-    const child = await db.updateChild(req.params.id, req.body);
+
+    // GDPR: Rensing av oppdateringsdata
+
+    const safeBody = {
+      name: clean(req.body.name),
+      age: clean(req.body.age),
+      group: clean(req.body.group)
+    };
+
+    const child = await db.updateChild(req.params.id, safeBody);
     if (!child) {
       return res.status(404).json({ error: 'Child not found' });
     }
