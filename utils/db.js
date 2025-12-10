@@ -9,7 +9,7 @@ async function readDatabase() {
     const data = await fs.readFile(DB_PATH, 'utf8');
     return JSON.parse(data);
   } catch (error) {
-    console.error('Error reading database:', error);
+    console.error('Feil ved lesing av database:', error);
     throw error;
   }
 }
@@ -20,7 +20,7 @@ async function writeDatabase(data) {
     await fs.writeFile(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
     return true;
   } catch (error) {
-    console.error('Error writing database:', error);
+    console.error('Feil ved skriving til database:', error);
     throw error;
   }
 }
@@ -80,7 +80,25 @@ async function getParentById(id) {
   return db.parents.find(parent => parent.id === parseInt(id));
 }
 
-// Oppdater forelder info
+// Opprett en ny forelder
+async function createParent(parent) {
+  const db = await readDatabase();
+
+  const newParent = {
+    id: db.parents.length > 0 ? Math.max(...db.parents.map(p => p.id)) + 1 : 1,
+    name: parent.name,
+    email: parent.email,
+    phone: parent.phone,
+    childrenIds: parent.childrenIds || []
+  };
+
+  db.parents.push(newParent);
+  await writeDatabase(db);
+
+  return newParent;
+}
+
+// Oppdater forelder
 async function updateParent(id, updates) {
   const db = await readDatabase();
   const index = db.parents.findIndex(parent => parent.id === parseInt(id));
@@ -89,6 +107,7 @@ async function updateParent(id, updates) {
 
   db.parents[index] = { ...db.parents[index], ...updates };
   await writeDatabase(db);
+
   return db.parents[index];
 }
 
@@ -98,7 +117,7 @@ async function getActivities() {
   return db.activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
-// Legg til en ny aktivitet
+// Legg til aktivitet
 async function addActivity(activity) {
   const db = await readDatabase();
   const newActivity = {
@@ -114,12 +133,13 @@ async function addActivity(activity) {
 // Hent aktiviteter for en gruppe
 async function getActivitiesByGroup(groupName) {
   const db = await readDatabase();
+
   return db.activities
     .filter(activity => activity.group === groupName)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
-// Hent alle grupper
+// Hent grupper
 async function getGroups() {
   const db = await readDatabase();
   return db.groups;
@@ -164,10 +184,10 @@ module.exports = {
   checkOutChild,
   getParents,
   getParentById,
+  createParent,
   updateParent,
   getActivities,
   addActivity,
-  getActivitiesByGroup,
   getGroups,
   updateGroup,
   getStats

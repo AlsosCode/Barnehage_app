@@ -20,29 +20,26 @@ Barnehage_app/
 │   ├── parents.js        # Foreldre-relaterte ruter
 │   ├── activities.js     # Aktivitets-ruter
 │   └── stats.js          # Statistikk-ruter
+├── transferRoutes.js     # Transfer/overførings-ruter
 ├── utils/
 │   └── db.js            # Database-hjelpefunksjoner
 └── my-app/              # React Native frontend
 ```
 
-## Installasjon
-
-1. Installer avhengigheter:
+## Start server
 ```bash
 npm install
-```
-
-2. Start serveren:
-```bash
 npm start
 ```
 
-Eller for development med auto-restart:
+### Start frontend
 ```bash
-npm run dev
+cd my-app
+npm install
+npm start
 ```
 
-Serveren kjører på `http://localhost:3000`
+Serveren kjører på `http://localhost:3002`
 
 ## Database Schema
 
@@ -257,12 +254,12 @@ GET /api/stats/groups
 
 ### Sjekk inn et barn
 ```bash
-curl -X POST http://localhost:3000/api/children/1/checkin
+curl -X POST http://localhost:3002/api/children/1/checkin
 ```
 
 ### Legg til en aktivitet
 ```bash
-curl -X POST http://localhost:3000/api/activities \
+curl -X POST http://localhost:3002/api/activities \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Tur til skogen",
@@ -273,7 +270,7 @@ curl -X POST http://localhost:3000/api/activities \
 
 ### Oppdater foreldrekontakt
 ```bash
-curl -X PUT http://localhost:3000/api/parents/1 \
+curl -X PUT http://localhost:3002/api/parents/1 \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "99887766",
@@ -289,7 +286,7 @@ I React Native-appen din, bruk `fetch` eller `axios` for å kommunisere med API-
 // Eksempel: Hent alle barn
 const fetchChildren = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/children');
+    const response = await fetch('http://localhost:3002/api/children');
     const data = await response.json();
     console.log(data);
   } catch (error) {
@@ -300,7 +297,7 @@ const fetchChildren = async () => {
 // Eksempel: Sjekk inn et barn
 const checkInChild = async (childId) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/children/${childId}/checkin`, {
+    const response = await fetch(`http://localhost:3002/api/children/${childId}/checkin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -314,7 +311,9 @@ const checkInChild = async (childId) => {
 };
 ```
 
-**NB:** Når du kjører på en fysisk enhet eller emulator, må du erstatte `localhost` med din maskins IP-adresse (f.eks. `http://192.168.1.100:3000`).
+**NB:** Når du kjører på en fysisk enhet eller emulator, må du erstatte `localhost` med din maskins IP-adresse (f.eks. `http://192.168.1.100:3002`).
+
+Se [my-app/services/api.ts](my-app/services/api.ts) for komplett API-klient implementasjon.
 
 ## Utvikling
 
@@ -322,12 +321,32 @@ const checkInChild = async (childId) => {
 - Dette er kun for prototype/testing - i produksjon bør du bruke en ekte database (MongoDB, PostgreSQL, etc.)
 - CORS er åpent for alle origins i development-modus
 
+## Frontend (React Native)
+
+Frontend-appen ligger i `my-app/` mappen og er bygget med Expo.
+
+### Start frontend
+```bash
+cd my-app
+npm install
+npm start
+```
+
+### Viktige filer
+- [my-app/services/api.ts](my-app/services/api.ts) - API-klient for kommunikasjon med backend
+- [my-app/app/(tabs)/](my-app/app/(tabs)/) - Alle app-skjermer (checkin, checkout, identity, etc.)
+
+## Kjente problemer
+
+- [server.js](server.js) har duplikatkode på linje 91-103 som bør ryddes opp
+- Port 3000 og 3002 brukes begge steder i koden - standardport er 3002
+
 ## Neste steg
 
-1. Koble frontend til backend API-et
+1. Rydde opp duplikatkode i server.js
 2. Implementer autentisering (login for foreldre/ansatte)
 3. Legg til bildeopplasting for aktiviteter
-4. Migrer til en ekte database
+4. Migrer til en ekte database (MongoDB/PostgreSQL)
 5. Implementer sanntids-oppdateringer med WebSockets
 
 ## Lisens

@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import api, { Child, Activity } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomeScreen() {
   const [children, setChildren] = useState<Child[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  
+  const { parentId, logout } = useAuth();
+  const router = useRouter();
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -18,7 +22,13 @@ export default function HomeScreen() {
 
       // Hent alle barn
       const childrenData = await api.children.getAll();
-      setChildren(childrenData);
+
+      // Filtrer barn basert på parentId hvis brukeren er en forelder
+      const filteredChildren = parentId
+        ? childrenData.filter((child: Child) => child.parentId === parentId)
+        : childrenData;
+
+      setChildren(filteredChildren);
 
       // Hent aktiviteter
       const activitiesData = await api.activities.getAll();
@@ -95,6 +105,10 @@ export default function HomeScreen() {
     });
   };
 
+  const handleChildPress = (childId: number) => {
+    router.push(`/(tabs)/childinfo?childId=${childId}` as any);
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -126,103 +140,98 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Stempling</Text>
-        <Text style={styles.date}>{getCurrentDate()}</Text>
+        <View>
+          <Text style={styles.greeting}>Hjem</Text>
+          <Text style={styles.date}>{getCurrentDate()}</Text>
+        </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {
+          logout();
+          router.replace('/login' as any);
+        }}>
+          <Text style={styles.logoutText}>Logg ut</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.childrenSection}>
-        <Text style={styles.sectionTitle}>Alle barn</Text>
-        {children.map((child) => (
-          <View key={child.id} style={styles.childCard}>
-            <View style={styles.childHeader}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
-              </View>
-              <View style={styles.childDetails}>
-                <Text style={styles.childName}>{child.name}</Text>
-                <Text style={styles.childGroup}>{child.group}</Text>
-                {child.checkedInAt && (
-                  <Text style={styles.timeText}>
-                    Inn: {formatTime(child.checkedInAt)}
-                  </Text>
-                )}
-              </View>
-              <View style={[
-                styles.statusBadge,
-                child.status === 'checked_in' && styles.statusIn,
-                child.status === 'checked_out' && styles.statusOut,
-                child.status === 'home' && styles.statusHome
-              ]}>
-                <Text style={styles.statusText}>
-                  {child.status === 'checked_in' && '✓ Inne'}
-                  {child.status === 'checked_out' && '✓ Ute'}
-                  {child.status === 'home' && 'Hjemme'}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  styles.checkInButton,
-                  (actionLoading === child.id || child.status === 'checked_in') && styles.buttonDisabled
-                ]}
-                onPress={() => handleCheckIn(child)}
-                disabled={actionLoading === child.id || child.status === 'checked_in'}
-              >
-                {actionLoading === child.id && child.status !== 'checked_in' ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <>
-                    <Text style={styles.buttonIcon}>✓</Text>
-                    <Text style={styles.buttonText}>Inn</Text>
-                  </>
-                )}
+      <ScrollView style={styles.content}>
+        <View style={styles.childrenSection}>
+          <Text style={styles.sectionTitle}>Stempling</Text>
+          {children.map((child) => (
+            <View key={child.id} style={styles.childCard}>
+              <TouchableOpacity onPress={() => handleChildPress(child.id)} activeOpacity={0.7}>
+                <View style={styles.childHeader}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
+                  </View>
+                  <View style={styles.childDetails}>
+                    <Text style={styles.childName}>{child.name}</Text>
+                    <Text style={styles.childGroup}>{child.age} år • {child.group}</Text>
+                  </View>
+                  <Text style={styles.arrowIcon}>›</Text>
+                </View>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  styles.checkOutButton,
-                  (actionLoading === child.id || child.status !== 'checked_in') && styles.buttonDisabled
-                ]}
-                onPress={() => handleCheckOut(child)}
-                disabled={actionLoading === child.id || child.status !== 'checked_in'}
-              >
-                {actionLoading === child.id && child.status === 'checked_in' ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : (
-                  <>
-                    <Text style={styles.buttonIcon}>✗</Text>
-                    <Text style={styles.buttonText}>Ut</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    styles.checkInButton,
+                    (actionLoading === child.id || child.status === 'checked_in') && styles.buttonDisabled
+                  ]}
+                  onPress={() => handleCheckIn(child)}
+                  disabled={actionLoading === child.id || child.status === 'checked_in'}
+                >
+                  {actionLoading === child.id && child.status !== 'checked_in' ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonIcon}>✓</Text>
+                      <Text style={styles.buttonText}>Stemple inn</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
 
-      {activities.length > 0 && (
-        <View style={styles.activitiesCard}>
-          <Text style={styles.sectionTitle}>Siste aktiviteter</Text>
-          {activities.map(activity => (
-            <View key={activity.id} style={styles.activityItem}>
-              <View style={styles.activityHeader}>
-                <Text style={styles.activityTitle}>{activity.title}</Text>
-                <Text style={styles.activityDate}>{formatDate(activity.createdAt)}</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    styles.checkOutButton,
+                    (actionLoading === child.id || child.status !== 'checked_in') && styles.buttonDisabled
+                  ]}
+                  onPress={() => handleCheckOut(child)}
+                  disabled={actionLoading === child.id || child.status !== 'checked_in'}
+                >
+                  {actionLoading === child.id && child.status === 'checked_in' ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonIcon}>✗</Text>
+                      <Text style={styles.buttonText}>Stemple ut</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
               </View>
-              <Text style={styles.activityDescription} numberOfLines={2}>
-                {activity.description}
-              </Text>
+
+              {child.status === 'checked_in' && (
+                <View style={styles.statusMessage}>
+                  <Text style={styles.statusMessageText}>✓ {child.name.split(' ')[0]} er for tiden i barnehagen</Text>
+                </View>
+              )}
+              {child.status === 'checked_out' && (
+                <View style={styles.statusMessageOut}>
+                  <Text style={styles.statusMessageTextOut}>✓ {child.name.split(' ')[0]} er sjekket ut</Text>
+                </View>
+              )}
+              {child.status === 'home' && (
+                <View style={styles.statusMessageHome}>
+                  <Text style={styles.statusMessageTextHome}>{child.name.split(' ')[0]} er hjemme</Text>
+                </View>
+              )}
             </View>
           ))}
         </View>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -238,59 +247,80 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    backgroundColor: 'white',
+    backgroundColor: '#003366',
     padding: 20,
     paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingBottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  logoutText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
   greeting: {
-    fontSize: 32,
+    fontSize: 48,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'white',
   },
   date: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    color: 'white',
     marginTop: 5,
     textTransform: 'capitalize',
   },
+  content: {
+    flex: 1,
+  },
   childrenSection: {
-    padding: 15,
+    padding: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
+    marginBottom: 20,
+    color: '#000',
+    textAlign: 'center',
   },
   childCard: {
     backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 12,
-    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 3,
   },
   childHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 20,
+    backgroundColor: '#f0f0f5',
+    padding: 15,
+    borderRadius: 12,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#007AFF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#999',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 15,
   },
   avatarText: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
     color: 'white',
   },
@@ -298,104 +328,87 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   childName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#000',
   },
   childGroup: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
-    marginTop: 2,
+    marginTop: 4,
   },
-  timeText: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-  },
-  statusIn: {
-    backgroundColor: '#d4edda',
-  },
-  statusOut: {
-    backgroundColor: '#fff3cd',
-  },
-  statusHome: {
-    backgroundColor: '#f8d7da',
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '600',
+  arrowIcon: {
+    fontSize: 32,
+    color: '#000',
+    fontWeight: '300',
   },
   buttonRow: {
-    flexDirection: 'row',
-    gap: 10,
+    flexDirection: 'column',
+    gap: 12,
   },
   actionButton: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    gap: 6,
+    padding: 18,
+    borderRadius: 12,
+    gap: 8,
   },
   checkInButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: '#003366',
   },
   checkOutButton: {
-    backgroundColor: '#FF9500',
+    backgroundColor: '#FF3B30',
   },
   buttonDisabled: {
     backgroundColor: '#ccc',
-    opacity: 0.6,
+    opacity: 0.5,
   },
   buttonIcon: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
   },
   buttonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
   },
-  activitiesCard: {
-    backgroundColor: 'white',
-    padding: 20,
-    marginTop: 5,
-    marginBottom: 20,
-    marginHorizontal: 15,
-    borderRadius: 12,
-  },
-  activityItem: {
+  statusMessage: {
+    backgroundColor: '#d4f4dd',
     padding: 15,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    marginBottom: 12,
+    borderRadius: 12,
+    marginTop: 15,
+    alignItems: 'center',
   },
-  activityHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  activityTitle: {
+  statusMessageText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
+    color: '#2d7a3e',
+    fontWeight: '500',
   },
-  activityDate: {
-    fontSize: 12,
-    color: '#666',
+  statusMessageOut: {
+    backgroundColor: '#fff3cd',
+    padding: 15,
+    borderRadius: 12,
+    marginTop: 15,
+    alignItems: 'center',
   },
-  activityDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
+  statusMessageTextOut: {
+    fontSize: 16,
+    color: '#856404',
+    fontWeight: '500',
+  },
+  statusMessageHome: {
+    backgroundColor: '#f8d7da',
+    padding: 15,
+    borderRadius: 12,
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  statusMessageTextHome: {
+    fontSize: 16,
+    color: '#721c24',
+    fontWeight: '500',
   },
   loadingText: {
     fontSize: 16,

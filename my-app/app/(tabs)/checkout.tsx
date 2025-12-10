@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   checkedOut: {
-    backgroundColor: "#b7f7c3",
+    backgroundColor: "#ffcccc",
   },
   home: {
     backgroundColor: "#f5f5f5",
