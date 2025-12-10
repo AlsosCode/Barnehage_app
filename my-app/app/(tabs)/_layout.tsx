@@ -39,6 +39,16 @@ export default function TabLayout() {
         }}
       />
 
+      <Tabs.Screen
+  name="createparent"
+  options={{
+    title: "Ny forelder",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol name="person.crop.circle.badge.plus" color={color} size={28} />
+    )
+  }}
+/>
+
       {/* Redigere kontaktinfo */}
       <Tabs.Screen
         name="editinfo"
@@ -94,6 +104,7 @@ export default function TabLayout() {
         }}
       />
 
+      {/*Bekrefte identitets side*/}
       <Tabs.Screen
         name="identity"
         options={{
