@@ -174,6 +174,36 @@ async function getStats() {
   };
 }
 
+// Slett forelder + tilknyttede barn + aktiviteter
+async function deleteParentAndData(parentId) {
+  const db = await readDatabase();
+  const id = parseInt(parentId);
+
+  // Finn forelder
+  const parent = db.parents.find(p => p.id === id);
+  if (!parent) {
+    return false; // Ingen forelder å slette
+  }
+
+  // Finn alle barn som hører til denne forelderen
+  const childrenToDelete = db.children.filter(child => child.parentId === id);
+  const childIds = new Set(childrenToDelete.map(c => c.id));
+
+  // Slett forelder
+  db.parents = db.parents.filter(p => p.id !== id);
+
+  // Slett barn
+  db.children = db.children.filter(child => child.parentId !== id);
+
+  // Slett aktiviteter knyttet til disse barna 
+  db.activities = db.activities.filter(
+    activity => !childIds.has(activity.childId)
+  );
+
+  await writeDatabase(db);
+  return true;
+}
+
 module.exports = {
   readDatabase,
   writeDatabase,
@@ -190,5 +220,6 @@ module.exports = {
   addActivity,
   getGroups,
   updateGroup,
-  getStats
+  getStats,
+  deleteParentAndData
 };
