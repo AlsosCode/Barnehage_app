@@ -186,14 +186,6 @@ npx expo start -c  # Start with cleared cache
 4. Update navigation in `_layout.tsx` if needed
 5. Test with both Admin and Guest roles
 
-## Contributing
-
-This is an educational project. Contributions, issues, and feature requests are welcome!
-
-## License
-
-This project is created for educational purposes as part of a Mobile Application Development course.
-
 ---
 
 **Note:** This application uses mock authentication for demonstration purposes. In production, implement proper authentication with JWT tokens, encrypted passwords, and secure session management.
