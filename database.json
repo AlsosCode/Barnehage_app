@@ -6,7 +6,10 @@
       "birthDate": "2021-03-15",
       "age": 4,
       "group": "Blå gruppe",
-      "allergies": ["Nøtter", "Egg"],
+      "allergies": [
+        "Nøtter",
+        "Egg"
+      ],
       "status": "checked_out",
       "checkedInAt": "2025-12-03T10:23:25.491Z",
       "checkedOutAt": "2025-12-08T11:37:31.162Z",
@@ -42,7 +45,9 @@
       "birthDate": "2021-09-05",
       "age": 4,
       "group": "Blå gruppe",
-      "allergies": ["Laktose"],
+      "allergies": [
+        "Laktose"
+      ],
       "status": "checked_in",
       "checkedInAt": "2025-12-08T11:37:28.299Z",
       "checkedOutAt": null,
@@ -78,7 +83,9 @@
       "birthDate": "2021-04-30",
       "age": 4,
       "group": "Rød gruppe",
-      "allergies": ["Gluten"],
+      "allergies": [
+        "Gluten"
+      ],
       "status": "checked_out",
       "checkedInAt": "2025-12-08T07:52:00.167Z",
       "checkedOutAt": "2025-12-08T07:52:57.278Z",
@@ -104,7 +111,10 @@
       "email": "kari.hansen@example.com",
       "phone": "12345678",
       "address": "Storgata 1, Oslo",
-      "childrenIds": [1, 6],
+      "childrenIds": [
+        1,
+        6
+      ],
       "verified": true
     },
     {
@@ -113,7 +123,9 @@
       "email": "per.johansen@example.com",
       "phone": "87654321",
       "address": "Lille vei 5, Bergen",
-      "childrenIds": [2],
+      "childrenIds": [
+        2
+      ],
       "verified": true
     },
     {
@@ -122,7 +134,9 @@
       "email": "sofia.andersen@example.com",
       "phone": "11223344",
       "address": "Haugeveien 12, Trondheim",
-      "childrenIds": [3],
+      "childrenIds": [
+        3
+      ],
       "verified": true
     },
     {
@@ -131,7 +145,9 @@
       "email": "martin.berg@example.com",
       "phone": "99887766",
       "address": "Parkveien 7, Oslo",
-      "childrenIds": [4],
+      "childrenIds": [
+        4
+      ],
       "verified": true
     },
     {
@@ -140,7 +156,9 @@
       "email": "anne.nilsen@example.com",
       "phone": "44556677",
       "address": "Bjørnveien 3, Bergen",
-      "childrenIds": [5],
+      "childrenIds": [
+        5
+      ],
       "verified": true
     },
     {
@@ -149,7 +167,9 @@
       "email": "tom.pedersen@example.com",
       "phone": "33445566",
       "address": "Rosegata 15, Stavanger",
-      "childrenIds": [6],
+      "childrenIds": [
+        6
+      ],
       "verified": true
     },
     {
@@ -158,7 +178,9 @@
       "email": "linda.larsen@example.com",
       "phone": "22334455",
       "address": "Solveien 9, Tromsø",
-      "childrenIds": [7],
+      "childrenIds": [
+        7
+      ],
       "verified": true
     },
     {
@@ -167,13 +189,22 @@
       "email": "erik.kristiansen@example.com",
       "phone": "55667788",
       "address": "Måkeveien 11, Kristiansand",
-      "childrenIds": [8]
+      "childrenIds": [
+        8
+      ]
     },
     {
       "id": 9,
       "name": "Siri Hagen",
       "email": "sirihagen2gmail.com",
       "phone": "90463178",
+      "childrenIds": []
+    },
+    {
+      "id": 10,
+      "name": "Linn Nordman",
+      "email": "LinnNordmann@example.com",
+      "phone": "12345678",
       "childrenIds": []
     }
   ],
@@ -195,6 +226,15 @@
       "createdAt": "2025-12-02T12:00:00Z",
       "createdBy": "staff",
       "group": "Blå gruppe"
+    },
+    {
+      "id": 3,
+      "title": "Tur i skogen",
+      "description": "idag gikk vi tur i skogen",
+      "imageUrl": null,
+      "createdBy": "staff",
+      "group": "Blå gruppe",
+      "createdAt": "2025-12-14T10:11:22.657Z"
     }
   ],
   "groups": [

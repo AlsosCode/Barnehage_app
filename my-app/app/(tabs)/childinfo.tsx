@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import api, { Child } from "@/services/api";
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
 export default function ChildInfoScreen() {
   const [child, setChild] = useState<Child | null>(null);
@@ -37,8 +38,8 @@ export default function ChildInfoScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.text}>Laster informasjon...</Text>
+        <ActivityIndicator size="large" color={Colors.light.secondary} />
+        <Text style={styles.loadingText}>Laster informasjon...</Text>
       </View>
     );
   }
@@ -66,221 +67,232 @@ export default function ChildInfoScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>← Tilbake</Text>
-      </TouchableOpacity>
-
-      <View style={styles.profileSection}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
-        </View>
-        <Text style={styles.name}>{child.name}</Text>
-        <Text style={styles.group}>{child.group}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Informasjon</Text>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Alder:</Text>
-          <Text style={styles.value}>{child.age} år</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Fødselsdato:</Text>
-          <Text style={styles.value}>{formatDate(child.birthDate)}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Avdeling:</Text>
-          <Text style={styles.value}>{child.group}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Status:</Text>
-          <View style={[styles.statusBadge,
-            child.status === 'checked_in' && styles.statusIn,
-            child.status === 'checked_out' && styles.statusOut,
-            child.status === 'home' && styles.statusHome
-          ]}>
-            <Text style={styles.statusText}>
-              {child.status === 'checked_in' && '✓ Inne'}
-              {child.status === 'checked_out' && '✓ Ute'}
-              {child.status === 'home' && 'Hjemme'}
-            </Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>← Tilbake</Text>
+        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{child.name.charAt(0)}</Text>
           </View>
+          <Text style={styles.name}>{child.name}</Text>
+          <Text style={styles.group}>{child.group}</Text>
         </View>
       </View>
 
-      {child.allergies && child.allergies.length > 0 && (
+      <ScrollView style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Allergier</Text>
-          {child.allergies.map((allergy, index) => (
-            <View key={index} style={styles.allergyItem}>
-              <Text style={styles.allergyText}>⚠️ {allergy}</Text>
-            </View>
-          ))}
-        </View>
-      )}
+          <Text style={styles.sectionTitle}>Informasjon</Text>
 
-      {child.checkedInAt && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tidspunkter</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Sjekket inn:</Text>
-            <Text style={styles.value}>
-              {new Date(child.checkedInAt).toLocaleTimeString('nb-NO', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </Text>
+            <Text style={styles.label}>Alder:</Text>
+            <Text style={styles.value}>{child.age} år</Text>
           </View>
-          {child.checkedOutAt && (
+
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Fødselsdato:</Text>
+            <Text style={styles.value}>{formatDate(child.birthDate)}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Avdeling:</Text>
+            <Text style={styles.value}>{child.group}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Status:</Text>
+            <View style={[styles.statusBadge,
+              child.status === 'checked_in' && styles.statusIn,
+              child.status === 'checked_out' && styles.statusOut,
+              child.status === 'home' && styles.statusHome
+            ]}>
+              <Text style={styles.statusText}>
+                {child.status === 'checked_in' && '✓ Inne'}
+                {child.status === 'checked_out' && '✓ Ute'}
+                {child.status === 'home' && 'Hjemme'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {child.allergies && child.allergies.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Allergier</Text>
+            {child.allergies.map((allergy, index) => (
+              <View key={index} style={styles.allergyItem}>
+                <Text style={styles.allergyText}>⚠️ {allergy}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {child.checkedInAt && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Tidspunkter</Text>
             <View style={styles.infoRow}>
-              <Text style={styles.label}>Sjekket ut:</Text>
+              <Text style={styles.label}>Sjekket inn:</Text>
               <Text style={styles.value}>
-                {new Date(child.checkedOutAt).toLocaleTimeString('nb-NO', {
+                {new Date(child.checkedInAt).toLocaleTimeString('nb-NO', {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
               </Text>
             </View>
-          )}
-        </View>
-      )}
-    </ScrollView>
+            {child.checkedOutAt && (
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Sjekket ut:</Text>
+                <Text style={styles.value}>
+                  {new Date(child.checkedOutAt).toLocaleTimeString('nb-NO', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Spacing.lg,
+  },
+  header: {
+    backgroundColor: Colors.light.primary,
+    paddingTop: 60,
+    paddingBottom: Spacing.lg,
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
   },
   backButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textWhite,
+    fontWeight: Typography.fontWeight.semibold,
   },
-  profileSection: {
-    backgroundColor: '#007AFF',
-    padding: 30,
+  headerContent: {
     alignItems: 'center',
+    paddingTop: Spacing.md,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'white',
+    backgroundColor: Colors.light.avatarBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: Spacing.base,
   },
   avatarText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontSize: Typography.fontSize.xxxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.textWhite,
   },
   name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 5,
+    fontSize: Typography.fontSize.xxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.textWhite,
+    marginBottom: Spacing.xs,
   },
   group: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textWhite,
+    opacity: 0.9,
+  },
+  content: {
+    flex: 1,
   },
   section: {
-    backgroundColor: 'white',
-    padding: 20,
-    marginTop: 15,
+    backgroundColor: Colors.light.card,
+    padding: Spacing.lg,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.medium,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    marginBottom: Spacing.base,
+    color: Colors.light.text,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: Colors.light.border,
   },
   label: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textSecondary,
   },
   value: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.light.text,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.lg,
   },
   statusIn: {
-    backgroundColor: '#d4edda',
+    backgroundColor: Colors.light.successLight,
   },
   statusOut: {
-    backgroundColor: '#fff3cd',
+    backgroundColor: Colors.light.warningLight,
   },
   statusHome: {
-    backgroundColor: '#f8d7da',
+    backgroundColor: Colors.light.errorLight,
   },
   statusText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.light.text,
   },
   allergyItem: {
-    backgroundColor: '#fff3cd',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
+    backgroundColor: Colors.light.warningLight,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.sm,
   },
   allergyText: {
-    fontSize: 16,
-    color: '#856404',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.warningText,
   },
-  text: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 10,
+  loadingText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textSecondary,
+    marginTop: Spacing.md,
   },
   errorText: {
-    fontSize: 16,
-    color: 'red',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.error,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
   },
   retryText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
   },
 });
