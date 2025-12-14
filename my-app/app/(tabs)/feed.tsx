@@ -3,11 +3,14 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
 const API_BASE_URL = "http://10.0.0.61:3002";
 
@@ -26,6 +29,8 @@ export default function FeedScreen() {
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const loadFeed = async () => {
     setLoading(true);
@@ -104,83 +109,171 @@ export default function FeedScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Barnehagefeed</Text>
-      <Text style={styles.subtitle}>
-        Oppdateringer fra ansatte til foreldre
-      </Text>
-
-      <View style={styles.inputCard}>
-        <TextInput
-          style={styles.input}
-          placeholder="Skriv en oppdatering…"
-          multiline
-          value={text}
-          onChangeText={setText}
-        />
-        <Button
-          title={publishing ? "Publiserer…" : "Publiser"}
-          onPress={publishPost}
-        />
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Feed</Text>
+          <Text style={styles.subtitle}>
+            Oppdateringer fra ansatte til foreldre
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {
+          logout();
+          router.replace('/login' as any);
+        }}>
+          <Text style={styles.logoutText}>Logg ut</Text>
+        </TouchableOpacity>
       </View>
 
-      {loading && (
-        <View style={styles.center}>
-          <ActivityIndicator />
-          <Text>Laster feed…</Text>
+      <View style={styles.content}>
+        <View style={styles.inputCard}>
+          <TextInput
+            style={styles.input}
+            placeholder="Skriv en oppdatering…"
+            multiline
+            value={text}
+            onChangeText={setText}
+          />
+          <TouchableOpacity
+            style={styles.publishButton}
+            onPress={publishPost}
+            disabled={publishing || !text.trim()}
+          >
+            <Text style={styles.publishButtonText}>
+              {publishing ? "Publiserer…" : "Publiser"}
+            </Text>
+          </TouchableOpacity>
         </View>
-      )}
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+        {loading && (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={Colors.light.secondary} />
+            <Text style={styles.loadingText}>Laster feed…</Text>
+          </View>
+        )}
 
-      <FlatList
-        data={posts}
-        keyExtractor={(item, index) => item._id ?? index.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-      />
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        <FlatList
+          data={posts}
+          keyExtractor={(item, index) => item._id ?? index.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 48, paddingHorizontal: 16 },
-  title: { fontSize: 22, fontWeight: "700" },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light.backgroundSecondary,
+  },
+  header: {
+    backgroundColor: Colors.light.primary,
+    padding: Spacing.lg,
+    paddingTop: 60,
+    paddingBottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  logoutButton: {
+    backgroundColor: Colors.light.buttonDanger,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    marginTop: 5,
+  },
+  logoutText: {
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  title: {
+    fontSize: 48,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.textWhite,
+  },
   subtitle: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginBottom: 16,
-    marginTop: 4,
+    fontSize: Typography.fontSize.lg,
+    color: Colors.light.textWhite,
+    marginTop: 5,
+  },
+  content: {
+    flex: 1,
+    padding: Spacing.lg,
   },
   inputCard: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    backgroundColor: "#f9fafb",
-    gap: 8,
+    backgroundColor: Colors.light.card,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.medium,
   },
   input: {
     minHeight: 60,
     textAlignVertical: "top",
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 8,
+    borderColor: Colors.light.inputBorder,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+    backgroundColor: Colors.light.inputBackground,
+    fontSize: Typography.fontSize.md,
   },
-  listContent: { paddingBottom: 24 },
+  publishButton: {
+    backgroundColor: Colors.light.primary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.base,
+    alignItems: 'center',
+  },
+  publishButtonText: {
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  listContent: {
+    paddingBottom: Spacing.xl,
+  },
   card: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.light.card,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.base,
+    marginBottom: Spacing.md,
+    ...Shadows.medium,
   },
-  author: { fontWeight: "600" },
-  date: { fontSize: 10, color: "#6b7280", marginBottom: 6 },
-  text: { fontSize: 14 },
-  center: { alignItems: "center", justifyContent: "center", padding: 16 },
-  errorText: { color: "#b91c1c", fontSize: 12, marginBottom: 8 },
+  author: {
+    fontWeight: Typography.fontWeight.semibold,
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.text,
+  },
+  date: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.light.textSecondary,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  text: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.light.text,
+  },
+  center: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.lg,
+  },
+  loadingText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textSecondary,
+    marginTop: Spacing.md,
+  },
+  errorText: {
+    color: Colors.light.error,
+    fontSize: Typography.fontSize.sm,
+    marginBottom: Spacing.sm,
+    padding: Spacing.md,
+    backgroundColor: Colors.light.errorLight,
+    borderRadius: BorderRadius.md,
+  },
 });

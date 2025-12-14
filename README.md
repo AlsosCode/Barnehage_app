@@ -1,354 +1,199 @@
-# Barnehage App - Backend API
+# Småtroll Barnehage App - Kindergarten Management System
 
-En enkel Express.js backend for en barnehage-app som håndterer barn, foreldre, aktiviteter og inn/ut-stempling.
+A full-stack kindergarten management application demonstrating modern mobile development practices, role-based access control, real-time data synchronization, and comprehensive parent-staff communication features.
 
-## Teknologi
+**Course:** Mobile Application Development | **Date:** December 2025
 
-- **Backend**: Express.js
-- **Database**: JSON fil (database.json)
-- **Frontend**: React Native (Expo) i `my-app/` mappen
+![React Native](https://img.shields.io/badge/React_Native-0.76-20232A?style=flat&logo=react)
+![Expo](https://img.shields.io/badge/Expo-52-000020?style=flat&logo=expo)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=flat&logo=node.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat&logo=typescript)
 
-## Prosjektstruktur
+## Quick Start
+
+### Prerequisites
+- Node.js 16+ and npm
+- Expo Go app on your mobile device (iOS/Android)
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/Barnehage_app.git
+   cd Barnehage_app
+   ```
+
+2. **Install backend dependencies and start server**
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Backend will run on `http://localhost:3002`
+
+3. **Install frontend dependencies and start app** (in new terminal)
+   ```bash
+   cd my-app
+   npm install
+   npx expo start
+   ```
+
+4. **Run the app**
+   - Scan QR code with Expo Go app (iOS Camera or Android Expo Go)
+   - Or press `i` for iOS simulator, `a` for Android emulator
+
+5. **Login credentials**
+   - **Admin:** Username: `Admin` / Password: `Admin`
+   - **Guest (Parent):** Username: `Gjest` / Password: `Gjest`
+
+## Project Architecture
+
+### Frontend
+**Technology Stack:** React Native + Expo SDK 52
+- **Framework:** Expo Router for file-based navigation
+- **UI Components:** Custom theme system with consistent design tokens
+- **State Management:** React Context API for authentication and user state
+- **Styling:** StyleSheet with centralized theme constants (Colors, Typography, Spacing)
+- **Navigation:** Tab-based navigation with role-specific routes
+
+**Key Features:**
+- Role-based UI rendering (Admin vs Guest/Parent views)
+- Real-time check-in/check-out tracking
+- Activity feed with parent-staff communication
+- Private messaging system
+- Child information management
+- Parent identity verification workflow
+
+### Backend
+**Technology Stack:** Node.js + Express
+- **Server:** Express 5.1.0 with CORS enabled
+- **API Design:** RESTful endpoints with JSON responses
+- **Middleware:** Body-parser for JSON parsing, CORS for cross-origin requests
+- **Data Validation:** Input sanitization and GDPR-compliant data handling
+
+**API Endpoints:**
+- `/api/children` - Child management (CRUD operations)
+- `/api/parents` - Parent management and verification
+- `/api/activities` - Activity feed posts
+- `/api/messages` - Parent-staff messaging
+- `/api/stats` - Real-time statistics and overview
+
+### Database
+**Current:** JSON file-based storage (`database.json`)
+- Lightweight and simple for development
+- Synchronous read/write operations
+- Direct object manipulation
+- Easy to inspect and debug
+
+**Data Models:**
+- **Children:** id, name, age, group, status, timestamps
+- **Parents:** id, name, email, phone, verified, childrenIds
+- **Activities:** id, title, description, group, createdAt
+- **Messages:** id, parentId, content, sender, timestamp, read
+
+## Future Development Roadmap
+
+### Phase 1: MongoDB Migration
+**Why MongoDB?**
+- Native JSON/BSON format aligns with current data structure
+- Horizontal scalability for growing user base
+- Flexible schema for evolving data models
+- Rich querying capabilities with aggregation pipeline
+- Built-in data validation and indexing
+
+**Migration Plan:**
+1. Set up MongoDB Atlas cluster or local MongoDB instance
+2. Create Mongoose schemas matching current data models
+3. Implement data migration scripts from JSON to MongoDB
+4. Update API endpoints to use MongoDB queries
+5. Add proper error handling and validation
+6. Implement connection pooling and retry logic
+
+### Phase 2: Enhanced Features
+- Push notifications for check-in/out events
+- Photo uploads for activities
+- Calendar integration for events
+- Multi-language support (Norwegian/English)
+- Offline-first architecture with sync
+
+### Phase 3: DevOps & Deployment
+- Docker containerization
+- CI/CD pipeline with GitHub Actions
+- Cloud deployment (AWS/Azure/GCP)
+- Automated testing (Jest, React Native Testing Library)
+- Performance monitoring and analytics
+
+## Technical Details
+
+### Security
+- Role-based access control (RBAC)
+- Input sanitization against XSS and injection attacks
+- GDPR-compliant data handling
+- Secure password storage (planned: bcrypt hashing)
+
+### Code Quality
+- TypeScript for type safety
+- Consistent code formatting
+- Component-based architecture
+- Separation of concerns (API service layer)
+
+### Observability
+- Console logging for debugging
+- Error boundary implementation (planned)
+- Performance metrics tracking (planned)
+
+## Project Structure
 
 ```
 Barnehage_app/
-├── server.js              # Hovedserverfil med Express
-├── database.json          # JSON-database
-├── package.json
-├── routes/               # API-ruter
-│   ├── children.js       # Barn-relaterte ruter
-│   ├── parents.js        # Foreldre-relaterte ruter
-│   ├── activities.js     # Aktivitets-ruter
-│   └── stats.js          # Statistikk-ruter
-├── transferRoutes.js     # Transfer/overførings-ruter
-├── utils/
-│   └── db.js            # Database-hjelpefunksjoner
-└── my-app/              # React Native frontend
+├── server.js                 # Express backend server
+├── database.json            # JSON file database
+├── routes/                  # API route handlers
+├── models/                  # Data models and schemas
+├── my-app/                  # React Native frontend
+│   ├── app/                 # Expo Router pages
+│   │   ├── (tabs)/         # Tab-based screens
+│   │   ├── login.tsx       # Login screen
+│   │   └── _layout.tsx     # Root layout and auth
+│   ├── components/         # Reusable components
+│   ├── contexts/           # React contexts (Auth)
+│   ├── services/           # API service layer
+│   └── constants/          # Theme and config
+└── README.md
 ```
 
-## Start server
+## Development
+
+### Available Scripts
+
+**Backend:**
 ```bash
-npm install
-npm start
+npm start          # Start production server
+npm run dev        # Start with nodemon (auto-reload)
 ```
 
-### Start frontend
+**Frontend:**
 ```bash
-cd my-app
-npm install
-npm start
+npx expo start     # Start Expo dev server
+npx expo start -c  # Start with cleared cache
 ```
 
-Serveren kjører på `http://localhost:3002`
+### Adding New Features
 
-## Database Schema
+1. Create API endpoint in backend (`routes/` or `server.js`)
+2. Add service method in `my-app/services/api.ts`
+3. Create or update screen in `my-app/app/(tabs)/`
+4. Update navigation in `_layout.tsx` if needed
+5. Test with both Admin and Guest roles
 
-### Children (Barn)
-```json
-{
-  "id": 1,
-  "name": "Liam Hansen",
-  "birthDate": "2021-03-15",
-  "age": 4,
-  "group": "Blå gruppe",
-  "allergies": ["Nøtter", "Egg"],
-  "status": "checked_in" | "checked_out" | "home",
-  "checkedInAt": "2025-12-02T08:15:00Z",
-  "checkedOutAt": null,
-  "parentId": 1
-}
-```
+## Contributing
 
-### Parents (Foreldre)
-```json
-{
-  "id": 1,
-  "name": "Kari Hansen",
-  "email": "kari.hansen@example.com",
-  "phone": "12345678",
-  "address": "Storgata 1, Oslo",
-  "childrenIds": [1]
-}
-```
+This is an educational project. Contributions, issues, and feature requests are welcome!
 
-### Activities (Aktiviteter)
-```json
-{
-  "id": 1,
-  "title": "Maling og kreativitet",
-  "description": "I dag hadde vi en fin maletime!",
-  "imageUrl": null,
-  "createdAt": "2025-12-02T10:30:00Z",
-  "createdBy": "staff",
-  "group": "Blå gruppe"
-}
-```
+## License
 
-### Groups (Grupper)
-```json
-{
-  "id": 1,
-  "name": "Blå gruppe",
-  "totalCapacity": 12,
-  "currentCount": 1
-}
-```
+This project is created for educational purposes as part of a Mobile Application Development course.
 
-## API Endpoints
+---
 
-### Barn (Children)
-
-#### Hent alle barn
-```
-GET /api/children
-```
-
-**Response:**
-```json
-[
-  {
-    "id": 1,
-    "name": "Liam Hansen",
-    "age": 4,
-    "group": "Blå gruppe",
-    "status": "checked_in",
-    ...
-  }
-]
-```
-
-#### Hent ett barn
-```
-GET /api/children/:id
-```
-
-**Response:**
-```json
-{
-  "id": 1,
-  "name": "Liam Hansen",
-  "age": 4,
-  ...
-}
-```
-
-#### Oppdater barn
-```
-PUT /api/children/:id
-```
-
-**Request Body:**
-```json
-{
-  "name": "Liam Hansen",
-  "allergies": ["Nøtter"]
-}
-```
-
-#### Sjekk inn barn
-```
-POST /api/children/:id/checkin
-```
-
-**Response:**
-```json
-{
-  "message": "Child checked in successfully",
-  "child": { ... }
-}
-```
-
-#### Sjekk ut barn
-```
-POST /api/children/:id/checkout
-```
-
-**Response:**
-```json
-{
-  "message": "Child checked out successfully",
-  "child": { ... }
-}
-```
-
-### Foreldre (Parents)
-
-#### Hent alle foreldre
-```
-GET /api/parents
-```
-
-#### Hent én forelder
-```
-GET /api/parents/:id
-```
-
-#### Oppdater forelder
-```
-PUT /api/parents/:id
-```
-
-**Request Body:**
-```json
-{
-  "name": "Kari Hansen",
-  "phone": "12345678",
-  "email": "kari@example.com"
-}
-```
-
-#### Hent alle barn for en forelder
-```
-GET /api/parents/:id/children
-```
-
-### Aktiviteter (Activities)
-
-#### Hent alle aktiviteter
-```
-GET /api/activities
-```
-
-**Query Parameters:**
-- `group`: Filtrer på gruppe (f.eks. `?group=Blå gruppe`)
-
-#### Legg til ny aktivitet
-```
-POST /api/activities
-```
-
-**Request Body:**
-```json
-{
-  "title": "Uteleker",
-  "description": "Vi lekte i snøen!",
-  "imageUrl": "https://...",
-  "group": "Blå gruppe"
-}
-```
-
-### Statistikk (Stats)
-
-#### Hent oversikt/statistikk
-```
-GET /api/stats
-```
-
-**Response:**
-```json
-{
-  "totalChildren": 3,
-  "checkedIn": 1,
-  "checkedOut": 1,
-  "home": 1,
-  "groups": [...]
-}
-```
-
-#### Hent alle grupper
-```
-GET /api/stats/groups
-```
-
-## Eksempel på bruk
-
-### Sjekk inn et barn
-```bash
-curl -X POST http://localhost:3002/api/children/1/checkin
-```
-
-### Legg til en aktivitet
-```bash
-curl -X POST http://localhost:3002/api/activities \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Tur til skogen",
-    "description": "Vi hadde en flott tur i skogen i dag!",
-    "group": "Blå gruppe"
-  }'
-```
-
-### Oppdater foreldrekontakt
-```bash
-curl -X PUT http://localhost:3002/api/parents/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "99887766",
-    "email": "ny.email@example.com"
-  }'
-```
-
-## Koble til frontend (React Native)
-
-I React Native-appen din, bruk `fetch` eller `axios` for å kommunisere med API-et:
-
-```javascript
-// Eksempel: Hent alle barn
-const fetchChildren = async () => {
-  try {
-    const response = await fetch('http://localhost:3002/api/children');
-    const data = await response.json();
-    console.log(data);
-  } catch (error) {
-    console.error('Error fetching children:', error);
-  }
-};
-
-// Eksempel: Sjekk inn et barn
-const checkInChild = async (childId) => {
-  try {
-    const response = await fetch(`http://localhost:3002/api/children/${childId}/checkin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    const data = await response.json();
-    console.log(data);
-  } catch (error) {
-    console.error('Error checking in child:', error);
-  }
-};
-```
-
-**NB:** Når du kjører på en fysisk enhet eller emulator, må du erstatte `localhost` med din maskins IP-adresse (f.eks. `http://192.168.1.100:3002`).
-
-Se [my-app/services/api.ts](my-app/services/api.ts) for komplett API-klient implementasjon.
-
-## Utvikling
-
-- Databasen er en enkel JSON-fil som blir lest og skrevet til for hver operasjon
-- Dette er kun for prototype/testing - i produksjon bør du bruke en ekte database (MongoDB, PostgreSQL, etc.)
-- CORS er åpent for alle origins i development-modus
-
-## Frontend (React Native)
-
-Frontend-appen ligger i `my-app/` mappen og er bygget med Expo.
-
-### Start frontend
-```bash
-cd my-app
-npm install
-npm start
-```
-
-### Viktige filer
-- [my-app/services/api.ts](my-app/services/api.ts) - API-klient for kommunikasjon med backend
-- [my-app/app/(tabs)/](my-app/app/(tabs)/) - Alle app-skjermer (checkin, checkout, identity, etc.)
-
-## Kjente problemer
-
-- [server.js](server.js) har duplikatkode på linje 91-103 som bør ryddes opp
-- Port 3000 og 3002 brukes begge steder i koden - standardport er 3002
-
-## Neste steg
-
-1. Rydde opp duplikatkode i server.js
-2. Implementer autentisering (login for foreldre/ansatte)
-3. Legg til bildeopplasting for aktiviteter
-4. Migrer til en ekte database (MongoDB/PostgreSQL)
-5. Implementer sanntids-oppdateringer med WebSockets
-
-## Lisens
-
-MIT
+**Note:** This application uses mock authentication for demonstration purposes. In production, implement proper authentication with JWT tokens, encrypted passwords, and secure session management.

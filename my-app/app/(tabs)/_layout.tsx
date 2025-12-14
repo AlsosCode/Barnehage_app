@@ -1,22 +1,12 @@
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const { userRole, logout } = useAuth();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    logout();
-    router.replace('/login' as any);
-  };
+  const { userRole } = useAuth();
 
   return (
     <Tabs
@@ -35,19 +25,7 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: '600',
         },
-        headerShown: userRole === 'admin',
-        headerStyle: {
-          backgroundColor: '#003366',
-        },
-        headerTintColor: 'white',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-        headerRight: () => (
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Text style={styles.logoutText}>Logg ut</Text>
-          </TouchableOpacity>
-        ),
+        headerShown: false,
         tabBarButton: HapticTab,
       }}>
 
@@ -63,15 +41,6 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
-  name="createparent"
-  options={{
-    title: "Ny forelder",
-    tabBarIcon: ({ color }) => (
-      <IconSymbol name="person.crop.circle.badge.plus" color={color} size={28} />
-    )
-  }}
-/>
 
       <Tabs.Screen
         name="editinfo"
@@ -140,6 +109,28 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Feed - visible for both guest and admin */}
+      <Tabs.Screen
+        name="feed"
+        options={{
+          title: 'Feed',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="newspaper.fill" color={color} />
+          ),
+        }}
+      />
+
+      {/* Messages - visible for both guest and admin */}
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: 'Meldinger',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="message.fill" color={color} />
+          ),
+        }}
+      />
+
       {/* Skjulte skjermer */}
       <Tabs.Screen
         name="childinfo"
@@ -149,11 +140,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/*Bekrefte identitets side*/}
-      <Tabs.Screen
-        name="explore"
-        options={{ href: null }}
-      />
 
       {/* Ny forelder */}
       <Tabs.Screen
@@ -173,19 +159,4 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  logoutButton: {
-    marginRight: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#FF3B30',
-    borderRadius: 6,
-  },
-  logoutText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});
 

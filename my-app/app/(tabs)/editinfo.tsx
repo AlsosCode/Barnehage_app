@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, ActivityIndicator, TouchableOpacity,
 import { useRouter } from "expo-router";
 import api, { Parent } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
 export default function EditInfoScreen() {
   const [parent, setParent] = useState<Parent | null>(null);
@@ -89,8 +90,8 @@ export default function EditInfoScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.text}>Laster kontaktinfo...</Text>
+        <ActivityIndicator size="large" color={Colors.light.secondary} />
+        <Text style={styles.loadingText}>Laster kontaktinfo...</Text>
       </View>
     );
   }
@@ -99,8 +100,8 @@ export default function EditInfoScreen() {
     return (
       <View style={[styles.container, styles.centered]}>
         <Text style={styles.errorText}>{error || 'Kunne ikke laste kontaktinfo'}</Text>
-        <TouchableOpacity style={styles.button} onPress={fetchParentInfo}>
-          <Text style={styles.buttonText}>Prøv igjen</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchParentInfo}>
+          <Text style={styles.retryText}>Prøv igjen</Text>
         </TouchableOpacity>
       </View>
     );
@@ -130,7 +131,7 @@ export default function EditInfoScreen() {
               onChangeText={setName}
               style={styles.input}
               placeholder="Ditt navn"
-              placeholderTextColor="#999"
+              placeholderTextColor={Colors.light.inputPlaceholder}
             />
           </View>
 
@@ -143,7 +144,7 @@ export default function EditInfoScreen() {
               placeholder="din@epost.no"
               keyboardType="email-address"
               autoCapitalize="none"
-              placeholderTextColor="#999"
+              placeholderTextColor={Colors.light.inputPlaceholder}
             />
           </View>
 
@@ -155,7 +156,7 @@ export default function EditInfoScreen() {
               style={styles.input}
               placeholder="12345678"
               keyboardType="phone-pad"
-              placeholderTextColor="#999"
+              placeholderTextColor={Colors.light.inputPlaceholder}
             />
           </View>
 
@@ -168,19 +169,19 @@ export default function EditInfoScreen() {
               placeholder="Din adresse"
               multiline
               numberOfLines={3}
-              placeholderTextColor="#999"
+              placeholderTextColor={Colors.light.inputPlaceholder}
             />
           </View>
 
           <TouchableOpacity
-            style={[styles.button, saving && styles.buttonDisabled]}
+            style={[styles.saveButton, saving && styles.buttonDisabled]}
             onPress={handleSave}
             disabled={saving}
           >
             {saving ? (
-              <ActivityIndicator size="small" color="white" />
+              <ActivityIndicator size="small" color={Colors.light.textWhite} />
             ) : (
-              <Text style={styles.buttonText}>Lagre endringer</Text>
+              <Text style={styles.saveButtonText}>Lagre endringer</Text>
             )}
           </TouchableOpacity>
 
@@ -198,16 +199,16 @@ export default function EditInfoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Spacing.lg,
   },
   header: {
-    backgroundColor: '#003366',
-    padding: 20,
+    backgroundColor: Colors.light.primary,
+    padding: Spacing.lg,
     paddingTop: 60,
     paddingBottom: 30,
     flexDirection: 'row',
@@ -215,97 +216,106 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   logoutButton: {
-    backgroundColor: '#FF3B30',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+    backgroundColor: Colors.light.buttonDanger,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.sm,
     marginTop: 5,
   },
   logoutText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: 'white',
+    fontSize: 48,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.textWhite,
   },
   subtitle: {
-    fontSize: 16,
-    color: 'white',
+    fontSize: Typography.fontSize.lg,
+    color: Colors.light.textWhite,
     marginTop: 5,
   },
   content: {
     flex: 1,
   },
   form: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: Colors.light.card,
+    padding: Spacing.lg,
+    margin: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.medium,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.light.text,
+    marginBottom: Spacing.sm,
   },
   input: {
-    padding: 15,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    fontSize: 16,
-    backgroundColor: 'white',
+    borderColor: Colors.light.inputBorder,
+    borderRadius: BorderRadius.md,
+    fontSize: Typography.fontSize.md,
+    backgroundColor: Colors.light.inputBackground,
+    color: Colors.light.text,
   },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
   },
-  button: {
-    backgroundColor: '#003366',
-    padding: 18,
-    borderRadius: 12,
+  saveButton: {
+    backgroundColor: Colors.light.primary,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: Spacing.base,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: Colors.light.buttonDisabled,
+    opacity: 0.5,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
+  saveButtonText: {
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
   },
   infoBox: {
-    backgroundColor: '#e3f2fd',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: Colors.light.successLight,
+    padding: Spacing.base,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.lg,
   },
   infoText: {
-    fontSize: 14,
-    color: '#1976d2',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.light.text,
     lineHeight: 20,
   },
-  text: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 10,
+  loadingText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textSecondary,
+    marginTop: Spacing.md,
   },
   errorText: {
-    fontSize: 16,
-    color: 'red',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.error,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
+  },
+  retryButton: {
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+  },
+  retryText: {
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
   },
 });

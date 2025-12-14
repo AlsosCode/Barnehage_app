@@ -1,21 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 import api, { Child } from "@/services/api";
-import { useFocusEffect } from "expo-router";
-import { useCallback } from "react";
-
+import { useFocusEffect, useRouter } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
 export default function CheckOutScreen() {
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   // Hent barn fra backend
   useFocusEffect(
-          useCallback(() =>{
-              fetchChildren();
-          }, [])
-      );
+    useCallback(() => {
+      fetchChildren();
+    }, [])
+  );
 
   const fetchChildren = async () => {
     try {
@@ -59,8 +61,8 @@ export default function CheckOutScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.text}>Laster barn...</Text>
+        <ActivityIndicator size="large" color={Colors.light.secondary} />
+        <Text style={styles.loadingText}>Laster barn...</Text>
       </View>
     );
   }
@@ -78,35 +80,57 @@ export default function CheckOutScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Registrere Check-out</Text>
-      <Text style={styles.text}>Trykk på barnet for å registrere check-out.</Text>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Check-Out</Text>
+          <Text style={styles.subtitle}>Trykk på barnet for å sjekke ut</Text>
+        </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {
+          logout();
+          router.replace('/login' as any);
+        }}>
+          <Text style={styles.logoutText}>Logg ut</Text>
+        </TouchableOpacity>
+      </View>
 
-      <FlatList
-        data={children}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.childButton,
-              item.status === 'checked_out' && styles.checkedOut,
-              item.status === 'home' && styles.home,
-            ]}
-            onPress={() => handleCheckout(item)}
-          >
-            <View style={styles.childInfo}>
-              <Text style={styles.childText}>{item.name}</Text>
-              <Text style={styles.groupText}>{item.group}</Text>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>
-                {item.status === 'checked_in' && '✓ Inne'}
-                {item.status === 'checked_out' && '✓ Ute'}
-                {item.status === 'home' && 'Hjemme'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={styles.content}>
+        <FlatList
+          data={children}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.childCard,
+                item.status === 'checked_out' && styles.checkedOut,
+                item.status === 'home' && styles.home,
+              ]}
+              onPress={() => handleCheckout(item)}
+            >
+              <View style={styles.childInfo}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
+                </View>
+                <View style={styles.childDetails}>
+                  <Text style={styles.childText}>{item.name}</Text>
+                  <Text style={styles.groupText}>{item.group}</Text>
+                </View>
+              </View>
+              <View style={[
+                styles.statusBadge,
+                item.status === 'checked_in' && styles.statusIn,
+                item.status === 'checked_out' && styles.statusOut,
+                item.status === 'home' && styles.statusHome,
+              ]}>
+                <Text style={styles.statusText}>
+                  {item.status === 'checked_in' && '✓ Inne'}
+                  {item.status === 'checked_out' && '✓ Ute'}
+                  {item.status === 'home' && 'Hjemme'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </View>
   );
 }
@@ -114,75 +138,138 @@ export default function CheckOutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  header: {
+    backgroundColor: Colors.light.primary,
+    padding: Spacing.lg,
+    paddingTop: 60,
+    paddingBottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  logoutButton: {
+    backgroundColor: Colors.light.buttonDanger,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    marginTop: 5,
+  },
+  logoutText: {
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
+    fontSize: 48,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.textWhite,
   },
-  text: {
-    fontSize: 16,
-    marginBottom: 20,
+  subtitle: {
+    fontSize: Typography.fontSize.lg,
+    color: Colors.light.textWhite,
+    marginTop: 5,
   },
-  childButton: {
-    padding: 15,
-    backgroundColor: "#eee",
-    borderRadius: 8,
-    marginBottom: 10,
+  content: {
+    flex: 1,
+    padding: Spacing.lg,
+  },
+  childCard: {
+    padding: Spacing.lg,
+    backgroundColor: Colors.light.card,
+    borderRadius: BorderRadius.xl,
+    marginBottom: Spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    ...Shadows.medium,
   },
   childInfo: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.light.avatarBackground,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.base,
+  },
+  avatarText: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.textWhite,
+  },
+  childDetails: {
+    flex: 1,
   },
   childText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.light.text,
   },
   groupText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.light.textSecondary,
     marginTop: 4,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#f0f0f0',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.light.text,
+  },
+  statusIn: {
+    backgroundColor: Colors.light.successLight,
+  },
+  statusOut: {
+    backgroundColor: Colors.light.warningLight,
+  },
+  statusHome: {
+    backgroundColor: Colors.light.errorLight,
   },
   checkedOut: {
-    backgroundColor: "#ffcccc",
+    backgroundColor: Colors.light.warningLight,
+    borderWidth: 2,
+    borderColor: Colors.light.warning,
   },
   home: {
-    backgroundColor: "#f5f5f5",
     opacity: 0.7,
   },
+  loadingText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textSecondary,
+    marginTop: Spacing.md,
+  },
   errorText: {
-    fontSize: 16,
-    color: 'red',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.error,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
   },
   retryText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
   },
 });
-

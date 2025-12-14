@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
@@ -31,7 +32,7 @@ export default function LoginScreen() {
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Barnehage App</Text>
+          <Text style={styles.title}>Småtroll Appen</Text>
           <Text style={styles.subtitle}>Logg inn for å fortsette</Text>
         </View>
 
@@ -82,83 +83,79 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: Spacing.lg,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: Spacing.xxxl,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    fontSize: Typography.fontSize.xxxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.text,
+    marginBottom: Spacing.md,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: Typography.fontSize.md,
+    color: Colors.light.textSecondary,
   },
   form: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    backgroundColor: Colors.light.card,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    ...Shadows.medium,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.light.text,
+    marginBottom: Spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    borderColor: Colors.light.inputBorder,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: Typography.fontSize.md,
+    backgroundColor: Colors.light.inputBackground,
   },
   loginButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: Colors.light.primary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.base,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: Spacing.md,
   },
   loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.light.textWhite,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
   },
   hintContainer: {
-    marginTop: 30,
-    padding: 15,
-    backgroundColor: '#f0f8ff',
-    borderRadius: 8,
+    marginTop: Spacing.xxl,
+    padding: Spacing.base,
+    backgroundColor: Colors.light.successLight,
+    borderRadius: BorderRadius.md,
     borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
+    borderLeftColor: Colors.light.primary,
   },
   hintTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.light.text,
+    marginBottom: Spacing.sm,
   },
   hintText: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.light.textSecondary,
+    marginBottom: Spacing.xs,
   },
 });
