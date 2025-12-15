@@ -1,178 +1,218 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
-} from "react-native";
-import { useRouter } from 'expo-router';
+  View,
+  FlatList,
+} from 'react-native';
+
+import api, { Message, Parent } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { Palette } from '@/constants/theme';
 
-
-const API_BASE_URL = "http://10.0.0.61:3002";
-
-type Message = {
-  _id?: string;
-  senderId: string;
-  receiverId: string;
-  text: string;
-  createdAt?: string;
-};
-
-const CURRENT_USER = "parent1";
-const OTHER_USER = "staff1";
+type ConversationMessage = Message & { parentName?: string };
 
 export default function MessagesScreen() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { userRole, parentId } = useAuth();
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { logout } = useAuth();
-  const router = useRouter();
+  const [content, setContent] = useState('');
+  const [parents, setParents] = useState<Parent[]>([]);
+  const [selectedParentId, setSelectedParentId] = useState<number | null>(null);
 
-  const loadMessages = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/messages/${CURRENT_USER}/${OTHER_USER}`
-      );
-      if (!res.ok) {
-        throw new Error(`Status: ${res.status}`);
+  const isGuest = userRole === 'guest';
+  const canSend = content.trim().length > 0;
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        if (isGuest) {
+          if (parentId == null) {
+            setMessages([]);
+            return;
+          }
+          const msgs = await api.messages.listForParent(parentId);
+          setMessages(
+            msgs.map((m) => ({
+              ...m,
+            })),
+          );
+        } else {
+          const [allParents, initialMessages] = await Promise.all([
+            api.parents.getAll(),
+            api.messages.listAll(),
+          ]);
+          setParents(allParents);
+          setMessages(
+            initialMessages.map((m) => ({
+              ...m,
+              parentName: allParents.find((p) => p.id === m.parentId)?.name,
+            })),
+          );
+        }
+      } finally {
+        setLoading(false);
       }
-      const data = (await res.json()) as Message[];
-      setMessages(data);
-    } catch (err) {
-      console.log("Feil ved henting av meldinger:", err);
-      setError(
-        "Klarte ikke å hente meldinger fra serveren. Prøv igjen senere."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!text.trim()) return;
-
-    const newMessage: Message = {
-      senderId: CURRENT_USER,
-      receiverId: OTHER_USER,
-      text: text.trim(),
-      createdAt: new Date().toISOString(),
     };
 
-    setSending(true);
-    setError(null);
+    load();
+  }, [isGuest, parentId]);
 
+  const filteredMessages = useMemo(() => {
+    if (isGuest) return messages;
+    if (!selectedParentId) return messages;
+    return messages.filter((m) => m.parentId === selectedParentId);
+  }, [isGuest, messages, selectedParentId]);
+
+  const handleSend = async () => {
+    if (!canSend) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/messages/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMessage),
-      });
+      setSending(true);
+      const targetParentId =
+        isGuest && parentId != null
+          ? parentId
+          : selectedParentId ?? parents[0]?.id;
 
-      if (!res.ok) {
-        throw new Error(`Status: ${res.status}`);
+      if (!targetParentId) {
+        return;
       }
 
-      const body = await res.json();
-      const saved = (body && body.message) || newMessage;
+      const msg = await api.messages.send({
+        parentId: targetParentId,
+        sender: isGuest ? 'parent' : 'staff',
+        content: content.trim(),
+      });
 
-      setMessages((prev) => [...prev, saved]);
-      setText("");
-    } catch (err) {
-      console.log("Feil ved sending av melding:", err);
-      // her velger vi å vise den lokalt uansett, for å gi flyt i brukeropplevelsen
-      setError("Klarte ikke å sende til serveren. Meldingen vises bare lokalt.");
-      setMessages((prev) => [...prev, newMessage]);
-      setText("");
+      const parentName =
+        parents.find((p) => p.id === msg.parentId)?.name ?? undefined;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          ...msg,
+          parentName,
+        },
+      ]);
+      setContent('');
     } finally {
       setSending(false);
     }
   };
 
-  useEffect(() => {
-    loadMessages();
-  }, []);
-
-  const renderItem = ({ item }: { item: Message }) => {
-    const isMe = item.senderId === CURRENT_USER;
+  const renderMessage = ({ item }: { item: ConversationMessage }) => {
+    const isOwn =
+      (isGuest && item.sender === 'parent') ||
+      (!isGuest && item.sender === 'staff');
 
     return (
       <View
         style={[
-          styles.messageBubble,
-          isMe ? styles.myMessage : styles.theirMessage,
+          styles.messageRow,
+          isOwn ? styles.messageRowOwn : styles.messageRowOther,
         ]}
       >
-        <Text style={[styles.messageText, isMe && styles.myMessageText]}>{item.text}</Text>
-        <Text style={[styles.messageMeta, isMe && styles.myMessageMeta]}>{isMe ? "Deg" : "Barnehagen"}</Text>
+        <View
+          style={[
+            styles.bubble,
+            isOwn ? styles.bubbleOwn : styles.bubbleOther,
+          ]}
+        >
+          {!isGuest && (
+            <Text style={styles.metaText}>
+              {item.sender === 'parent' ? item.parentName || `Forelder #${item.parentId}` : 'Ansatt'}
+            </Text>
+          )}
+          <Text style={styles.messageText}>{item.content}</Text>
+          <Text style={styles.timeText}>
+            {new Date(item.createdAt).toLocaleTimeString('nb-NO', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Text>
+        </View>
       </View>
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Palette.primary} />
+        <Text style={styles.centeredText}>Laster meldinger...</Text>
+      </View>
+    );
+  }
+
+  const parentSelector =
+    !isGuest && parents.length > 0 ? (
+      <View style={styles.parentRow}>
+        {parents.map((p) => {
+          const active =
+            (selectedParentId ?? parents[0]?.id) === p.id;
+          return (
+            <TouchableOpacity
+              key={p.id}
+              style={[
+                styles.parentChip,
+                active && styles.parentChipActive,
+              ]}
+              onPress={() => setSelectedParentId(p.id)}
+            >
+              <Text
+                style={[
+                  styles.parentChipText,
+                  active && styles.parentChipTextActive,
+                ]}
+              >
+                {p.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    ) : null;
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={80}
     >
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Meldinger</Text>
-          <Text style={styles.subtitle}>
-            Dialog mellom forelder og barnehage
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={() => {
-          logout();
-          router.replace('/login' as any);
-        }}>
-          <Text style={styles.logoutText}>Logg ut</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
-        {loading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color={Colors.light.secondary} />
-            <Text style={styles.loadingText}>Laster meldinger…</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={messages}
-            keyExtractor={(item, index) => item._id ?? index.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
-
-        {error && <Text style={styles.errorText}>{error}</Text>}
-      </View>
-
+      {parentSelector}
+      <FlatList
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        data={filteredMessages}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={renderMessage}
+      />
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
-          placeholder="Skriv melding…"
-          value={text}
-          onChangeText={setText}
+          placeholder="Skriv en melding..."
+          value={content}
+          onChangeText={setContent}
         />
         <TouchableOpacity
-          style={styles.sendButton}
-          onPress={sendMessage}
-          disabled={sending || !text.trim()}
+          style={[
+            styles.sendButton,
+            (!canSend || sending) && styles.sendButtonDisabled,
+          ]}
+          onPress={handleSend}
+          disabled={!canSend || sending}
         >
-          <Text style={styles.sendButtonText}>
-            {sending ? "Sender…" : "Send"}
-          </Text>
+          {sending ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.sendText}>Send</Text>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -180,129 +220,119 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: Colors.light.backgroundSecondary,
+    backgroundColor: Palette.background,
   },
-  header: {
-    backgroundColor: Colors.light.primary,
-    padding: Spacing.lg,
-    paddingTop: 60,
-    paddingBottom: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
   },
-  logoutButton: {
-    backgroundColor: Colors.light.buttonDanger,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-    marginTop: 5,
+  centeredText: {
+    marginTop: 8,
+    color: Palette.textMuted,
   },
-  logoutText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  title: {
-    fontSize: 48,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.light.textWhite,
-  },
-  subtitle: {
-    fontSize: Typography.fontSize.lg,
-    color: Colors.light.textWhite,
-    marginTop: 5,
-  },
-  content: {
+  list: {
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    padding: 16,
+    paddingBottom: 80,
   },
-  messageBubble: {
-    maxWidth: "80%",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.xl,
-    marginBottom: Spacing.sm,
+  messageRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
   },
-  myMessage: {
-    backgroundColor: Colors.light.primary,
-    alignSelf: "flex-end",
+  messageRowOwn: {
+    justifyContent: 'flex-end',
   },
-  theirMessage: {
-    backgroundColor: Colors.light.card,
-    alignSelf: "flex-start",
-    ...Shadows.small,
+  messageRowOther: {
+    justifyContent: 'flex-start',
+  },
+  bubble: {
+    maxWidth: '80%',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  bubbleOwn: {
+    backgroundColor: Palette.primary,
+  },
+  bubbleOther: {
+    backgroundColor: '#E5E7EB',
   },
   messageText: {
-    color: Colors.light.text,
-    fontSize: Typography.fontSize.base,
+    color: '#111827',
   },
-  myMessageText: {
-    color: Colors.light.textWhite,
+  metaText: {
+    fontSize: 11,
+    color: '#6B7280',
+    marginBottom: 2,
   },
-  messageMeta: {
-    fontSize: Typography.fontSize.xs,
-    marginTop: Spacing.xs,
-    color: Colors.light.textSecondary,
-  },
-  myMessageMeta: {
-    color: Colors.light.textWhite,
-    opacity: 0.8,
+  timeText: {
+    fontSize: 10,
+    color: '#9CA3AF',
+    marginTop: 4,
+    textAlign: 'right',
   },
   inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.md,
-    backgroundColor: Colors.light.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
     borderTopWidth: 1,
-    borderTopColor: Colors.light.border,
-    gap: Spacing.sm,
+    borderTopColor: Palette.border,
+    backgroundColor: '#FFFFFF',
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: Colors.light.inputBorder,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: Colors.light.inputBackground,
-    fontSize: Typography.fontSize.md,
+    borderColor: '#D1D5DB',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: '#FFFFFF',
   },
   sendButton: {
-    backgroundColor: Colors.light.primary,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: Palette.primary,
   },
-  sendButtonText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
+  sendButtonDisabled: {
+    opacity: 0.7,
   },
-  center: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing.lg,
-    flex: 1,
+  sendText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
-  loadingText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.textSecondary,
-    marginTop: Spacing.md,
+  parentRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingTop: 12,
   },
-  errorText: {
-    color: Colors.light.error,
-    fontSize: Typography.fontSize.sm,
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xs,
-    padding: Spacing.md,
-    backgroundColor: Colors.light.errorLight,
-    borderRadius: BorderRadius.md,
-    margin: Spacing.lg,
+  parentChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    backgroundColor: '#FFFFFF',
+  },
+  parentChipActive: {
+    borderColor: Palette.primary,
+    backgroundColor: '#EFF6FF',
+  },
+  parentChipText: {
+    fontSize: 12,
+    color: Palette.text,
+  },
+  parentChipTextActive: {
+    fontWeight: '700',
   },
 });
+

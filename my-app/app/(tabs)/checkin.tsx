@@ -10,31 +10,34 @@ import {
   TextInput,
 } from "react-native";
 import api, { Child } from "@/services/api";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useAuth } from "@/contexts/AuthContext";
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { useFocusEffect } from "expo-router";
+import { Palette } from '@/constants/theme';
+import { ChildStatus } from '@/constants/statuses';
+import { useLogger } from '@/hooks/useLogger';
 
 export default function CheckInScreen() {
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { logout } = useAuth();
-  const router = useRouter();
+  const [processingId, setProcessingId] = useState<number | null>(null);
+  const { log, error: logError } = useLogger('CheckInScreen');
 
   const fetchChildren = useCallback(async () => {
     try {
       setLoading(true);
+      log('Fetching children for check-in');
       const data = await api.children.getAll();
       setChildren(data);
       setError(null);
     } catch (error) {
-      setError("Kunne ikke hente barn. Sjekk at serveren kjører.");
-      console.error("Error fetching children", error);
+      const errorMsg = "Kunne ikke hente barn. Sjekk at serveren kjører.";
+      setError(errorMsg);
+      logError(errorMsg, { error });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [log, logError]);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,21 +47,23 @@ export default function CheckInScreen() {
 
   const handleCheckin = async (child: Child) => {
     try {
-      if (child.status === "checked_in") {
+      if (processingId === child.id) return;
+      if (child.status === ChildStatus.CHECKED_IN) {
         Alert.alert("Info", `${child.name} er allerede sjekket inn.`);
         return;
       }
 
-      // Sjekker inn barnet via API
+      log(`Checking in ${child.name}`);
+      setProcessingId(child.id);
       await api.children.checkIn(child.id);
 
       Alert.alert("Suksess", `${child.name} er sjekket inn!`);
-
-      // Oppdaterer listen
       await fetchChildren();
     } catch (error) {
+      logError("Error checking in child", { error });
       Alert.alert("Feil", "Kunne ikke sjekke inn barnet. Prøv igjen.");
-      console.error("Error checking in child", error);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -69,8 +74,8 @@ export default function CheckInScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={Colors.light.secondary} />
-        <Text style={styles.loadingText}>Laster barn...</Text>
+        <ActivityIndicator size="large" color={Palette.primary} />
+        <Text style={styles.text}>Laster barn...</Text>
       </View>
     );
   }
@@ -88,217 +93,153 @@ export default function CheckInScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Check-In</Text>
-          <Text style={styles.subtitle}>Trykk på barnet for å sjekke inn</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={() => {
-          logout();
-          router.replace('/login' as any);
-        }}>
-          <Text style={styles.logoutText}>Logg ut</Text>
-        </TouchableOpacity>
-      </View>
+      <Text style={styles.title}>Registrere Check-In</Text>
+      <Text style={styles.text}>Trykk på barnet for å check-in.</Text>
 
-      <View style={styles.content}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Søk etter barn..."
-          placeholderTextColor={Colors.light.inputPlaceholder}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Søk etter barn..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
 
-        <FlatList
-          data={filteredChildren}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
+      <FlatList
+        data={filteredChildren}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[
+              styles.childButton,
+              item.status === "checked_in" && styles.childButtonIn,
+              item.status === "home" && styles.childButtonHome,
+            ]}
+            disabled={processingId === item.id}
+            onPress={() => handleCheckin(item)}
+          >
+            <View style={styles.childInfo}>
+              <Text style={styles.childText}>{item.name}</Text>
+              <Text style={styles.groupText}>{item.group}</Text>
+            </View>
+
+            <View
               style={[
-                styles.childCard,
-                item.status === "checked_in" && styles.checkedIn,
-                item.status === "home" && styles.home,
-              ]}
-              onPress={() => handleCheckin(item)}
-            >
-              <View style={styles.childInfo}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-                </View>
-                <View style={styles.childDetails}>
-                  <Text style={styles.childText}>{item.name}</Text>
-                  <Text style={styles.groupText}>{item.group}</Text>
-                </View>
-              </View>
-
-              <View style={[
                 styles.statusBadge,
-                item.status === "checked_in" && styles.statusIn,
-                item.status === "checked_out" && styles.statusOut,
-                item.status === "home" && styles.statusHome,
-              ]}>
-                <Text style={styles.statusText}>
-                  {item.status === "checked_in" && "✓ Inne"}
-                  {item.status === "checked_out" && "✓ Ute"}
-                  {item.status === "home" && "Hjemme"}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+                item.status === 'checked_in' && styles.statusIn,
+                item.status === 'checked_out' && styles.statusOut,
+                item.status === 'home' && styles.statusHome,
+              ]}
+            >
+              <Text style={styles.statusText}>
+                {item.status === "checked_in" && "✓ Inne"}
+                {item.status === "checked_out" && "✓ Ute"}
+                {item.status === "home" && "Hjemme"}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 }
 
+// Styles
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.backgroundSecondary,
+    padding: 20,
+    backgroundColor: '#F5F7FB',
   },
   centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.lg,
-  },
-  header: {
-    backgroundColor: Colors.light.primary,
-    padding: Spacing.lg,
-    paddingTop: 60,
-    paddingBottom: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  logoutButton: {
-    backgroundColor: Colors.light.buttonDanger,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-    marginTop: 5,
-  },
-  logoutText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    fontSize: 48,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.light.textWhite,
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: '#003366',
   },
-  subtitle: {
-    fontSize: Typography.fontSize.lg,
-    color: Colors.light.textWhite,
-    marginTop: 5,
-  },
-  content: {
-    flex: 1,
-    padding: Spacing.lg,
+  text: {
+    fontSize: 16,
+    marginBottom: 20,
+    color: '#4B5563',
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: Colors.light.inputBorder,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.base,
-    marginBottom: Spacing.lg,
-    backgroundColor: Colors.light.card,
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.text,
-    ...Shadows.small,
+    borderColor: "#d0d4dd",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+    backgroundColor: "#fff",
   },
-  childCard: {
-    padding: Spacing.lg,
-    backgroundColor: Colors.light.card,
-    borderRadius: BorderRadius.xl,
-    marginBottom: Spacing.md,
+  childButton: {
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginBottom: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    ...Shadows.medium,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  childButtonIn: {
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  childButtonHome: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   childInfo: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.light.avatarBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.base,
-  },
-  avatarText: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.light.textWhite,
-  },
-  childDetails: {
-    flex: 1,
   },
   childText: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.light.text,
+    fontSize: 18,
+    fontWeight: "600",
+    color: '#111827',
   },
   groupText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.light.textSecondary,
+    fontSize: 14,
+    color: "#6B7280",
     marginTop: 4,
   },
   statusBadge: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.light.backgroundSecondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: '#E5E7EB',
+    minWidth: 70,
+    alignItems: 'center',
   },
   statusText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.light.text,
+    fontSize: 12,
+    fontWeight: "600",
+    color: '#111827',
   },
-  statusIn: {
-    backgroundColor: Colors.light.successLight,
-  },
-  statusOut: {
-    backgroundColor: Colors.light.warningLight,
-  },
-  statusHome: {
-    backgroundColor: Colors.light.errorLight,
-  },
-  checkedIn: {
-    backgroundColor: Colors.light.successLight,
-    borderWidth: 2,
-    borderColor: Colors.light.success,
-  },
-  home: {
-    opacity: 0.7,
-  },
-  loadingText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.textSecondary,
-    marginTop: Spacing.md,
-  },
+  statusIn: { backgroundColor: '#DCFCE7' },
+  statusOut: { backgroundColor: '#FEE2E2' },
+  statusHome: { backgroundColor: '#E5E7EB' },
   errorText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.error,
-    textAlign: 'center',
-    marginBottom: Spacing.lg,
+    fontSize: 16,
+    color: "red",
+    textAlign: "center",
+    marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: Colors.light.primary,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    backgroundColor: Palette.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   retryText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.semibold,
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

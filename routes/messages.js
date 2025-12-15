@@ -1,38 +1,72 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Message = require("../models/Message");
+const db = require('../utils/dbDriver');
 
-// Send melding
-router.post("/send", async (req, res) => {
-  const { senderId, receiverId, text } = req.body;
+function clean(value) {
+  if (value === undefined || value === null) return undefined;
+  return String(value).trim();
+}
 
+function errorResponse(res, error, fallback = 'Internal error') {
+  if (error && error.status) {
+    return res.status(error.status).json({ error: error.message });
+  }
+  return res.status(500).json({ error: fallback });
+}
+
+// GET /api/messages?parentId=1 - hent meldinger
+router.get('/', async (req, res) => {
   try {
-    const message = new Message({ senderId, receiverId, text });
-    await message.save();
-    res.json({ success: true, message });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Kunne ikke sende melding" });
+    const parentIdRaw = clean(req.query.parentId);
+    let messages;
+    if (parentIdRaw) {
+      messages = await db.getMessagesForParent(parentIdRaw);
+    } else {
+      messages = await db.getMessages();
+    }
+    res.json(messages);
+  } catch (error) {
+    errorResponse(res, error, 'Failed to fetch messages');
   }
 });
 
-// Meldinger mellom 2 brukere
-router.get("/:senderId/:receiverId", async (req, res) => {
-  const { senderId, receiverId } = req.params;
-
+// POST /api/messages - opprett ny melding
+router.post('/', async (req, res) => {
   try {
-    const messages = await Message.find({
-      $or: [
-        { senderId, receiverId },
-        { senderId: receiverId, receiverId: senderId }
-      ]
-    }).sort({ createdAt: 1 });
+    const parentId = req.body.parentId;
+    const sender = req.body.sender === 'staff' ? 'staff' : 'parent';
+    const content = clean(req.body.content);
 
-    res.json(messages);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Kunne ikke hente meldinger" });
+    if (!parentId || !content) {
+      const err = new Error('parentId and content are required');
+      err.status = 400;
+      throw err;
+    }
+
+    const message = await db.addMessage({
+      parentId,
+      sender,
+      content,
+    });
+
+    res.status(201).json(message);
+  } catch (error) {
+    errorResponse(res, error, 'Failed to create message');
+  }
+});
+
+// POST /api/messages/:id/read - marker som lest
+router.post('/:id/read', async (req, res) => {
+  try {
+    const updated = await db.markMessageRead(req.params.id);
+    if (!updated) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+    res.json(updated);
+  } catch (error) {
+    errorResponse(res, error, 'Failed to mark message as read');
   }
 });
 
 module.exports = router;
+

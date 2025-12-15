@@ -5,10 +5,10 @@ const path = require("path");
 const router = express.Router();
 const dbPath = path.join(__dirname, "..", "database.json");
 
-// Enkel funksjon som rengjør teksten
+// Helpers
 function clean(value) {
-  if (!value) return "";
-  return String(value).trim().replace(/[<>]/g, "");
+  if (value === undefined) return undefined;
+  return String(value || "").trim().replace(/[<>]/g, "");
 }
 
 function readDb() {
@@ -19,6 +19,10 @@ function writeDb(data) {
   fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
 }
 
+function isValidDate(date) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
 // --------------------------------------------------
 // POST /api/transfer  –  Lagre hentetillatelse
 // --------------------------------------------------
@@ -26,16 +30,19 @@ router.post("/transfer", (req, res) => {
   const db = readDb();
 
   // Renser input
-
-  const childId = clean(req.body.childId);
+  const childIdRaw = clean(req.body.childId);
   const name = clean(req.body.name);
   const relation = clean(req.body.relation);
   const phone = clean(req.body.phone);
-  const validDate = clean(req.body.validDate)
-  const createdByParentId= clean(req.body.createdByParentId);
+  const validDate = clean(req.body.validDate);
+  const createdByParentId = clean(req.body.createdByParentId);
+  const childId = parseInt(childIdRaw, 10);
 
-  if (!childId || !name || !validDate) {
+  if (Number.isNaN(childId) || !name || !validDate) {
     return res.status(400).json({ error: "Mangler påkrevde felter" });
+  }
+  if (!isValidDate(validDate)) {
+    return res.status(400).json({ error: "Ugyldig datoformat (bruk YYYY-MM-DD)" });
   }
 
   const child = db.children.find((c) => c.id === childId);

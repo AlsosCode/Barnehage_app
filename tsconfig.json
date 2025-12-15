@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2019",
-    "module": "commonjs",
+    "module": "es2015",
     "allowJs": true,
     "checkJs": false,
     "esModuleInterop": true,
@@ -12,5 +12,8 @@
     "server.js",
     "routes/**/*.js",
     "utils/**/*.js"
+  ],
+  "exclude": [
+    "my-app"
   ]
 }

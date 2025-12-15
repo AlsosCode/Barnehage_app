@@ -2,94 +2,197 @@ const fs = require('fs').promises;
 const path = require('path');
 
 const DB_PATH = path.join(__dirname, '..', 'database.json');
+const VALID_STATUSES = new Set(['checked_in', 'checked_out', 'home']);
+const GROUP_LABELS = {
+  bla: 'Blå gruppe',
+  rod: 'Rød gruppe',
+};
 
-// Les hele databasen
+function normalizeGroupLabel(value) {
+  if (!value) return '';
+  const raw = String(value).trim();
+  const lower = raw.toLowerCase();
+  const cleaned = lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+  if (cleaned.includes('bla')) return GROUP_LABELS.bla;
+  if (cleaned.includes('rod') || cleaned.includes('roed') || cleaned.includes('red')) return GROUP_LABELS.rod;
+  return raw;
+}
+
+function groupKey(value) {
+  const label = normalizeGroupLabel(value);
+  const lower = label.toLowerCase();
+  if (lower.includes('blå') || lower.includes('bla')) return 'bla';
+  if (lower.includes('rød') || lower.includes('rod') || lower.includes('roed') || lower.includes('red')) return 'rod';
+  return '';
+}
+
+function normalizeStatus(status) {
+  return VALID_STATUSES.has(status) ? status : 'home';
+}
+
+function normalizeChild(child) {
+  const group = normalizeGroupLabel(child.group);
+  return {
+    ...child,
+    name: child.name || 'Ukjent barn',
+    age: typeof child.age === 'number' ? child.age : '',
+    group,
+    status: normalizeStatus(child.status),
+    consentGiven: !!child.consentGiven,
+  };
+}
+
+function normalizeParent(parent) {
+  return {
+    ...parent,
+    address: parent.address || '',
+    verified: !!parent.verified,
+    childrenIds: Array.isArray(parent.childrenIds) ? parent.childrenIds : [],
+  };
+}
+
+function normalizeActivity(activity) {
+  const group = normalizeGroupLabel(activity.group);
+  return {
+    ...activity,
+    group: group || undefined,
+  };
+}
+
+function normalizeGroup(group) {
+  const name = normalizeGroupLabel(group.name) || group.name;
+  return {
+    ...group,
+    name,
+    currentCount: typeof group.currentCount === 'number' ? group.currentCount : 0,
+    totalCapacity: typeof group.totalCapacity === 'number' ? group.totalCapacity : 0,
+  };
+}
+
+function normalizeDatabase(db) {
+  return {
+    children: Array.isArray(db.children) ? db.children.map(normalizeChild) : [],
+    parents: Array.isArray(db.parents) ? db.parents.map(normalizeParent) : [],
+    activities: Array.isArray(db.activities) ? db.activities.map(normalizeActivity) : [],
+    groups: Array.isArray(db.groups) ? db.groups.map(normalizeGroup) : [],
+  };
+}
+
 async function readDatabase() {
-  try {
-    const data = await fs.readFile(DB_PATH, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Feil ved lesing av database:', error);
-    throw error;
-  }
+  const data = await fs.readFile(DB_PATH, 'utf8');
+  return normalizeDatabase(JSON.parse(data));
 }
 
-// Skriv til databasen
 async function writeDatabase(data) {
-  try {
-    await fs.writeFile(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Feil ved skriving til database:', error);
-    throw error;
-  }
+  const normalized = normalizeDatabase(data);
+  await fs.writeFile(DB_PATH, JSON.stringify(normalized, null, 2), 'utf8');
+  return true;
 }
 
-// Hent alle barn
+function nextId(items) {
+  return items.length > 0 ? Math.max(...items.map((i) => i.id || 0)) + 1 : 1;
+}
+
 async function getChildren() {
   const db = await readDatabase();
   return db.children;
 }
 
-// Hent ett barn basert pÃ¥ ID
 async function getChildById(id) {
   const db = await readDatabase();
-  return db.children.find(child => child.id === parseInt(id));
+  return db.children.find((child) => child.id === parseInt(id));
 }
 
-// Oppdater et barn
+async function addChild(payload) {
+  const db = await readDatabase();
+  const parent = db.parents.find((p) => p.id === parseInt(payload.parentId));
+  if (!parent) {
+    const err = new Error('Parent not found');
+    err.status = 400;
+    throw err;
+  }
+
+  const newChild = normalizeChild({
+    id: nextId(db.children),
+    name: payload.name,
+    birthDate: payload.birthDate || '',
+    age: typeof payload.age === 'number' ? payload.age : '',
+    group: normalizeGroupLabel(payload.group),
+    allergies: Array.isArray(payload.allergies) ? payload.allergies : [],
+    status: normalizeStatus(payload.status),
+    checkedInAt: payload.status === 'checked_in' ? new Date().toISOString() : null,
+    checkedOutAt: null,
+    parentId: parseInt(payload.parentId),
+    consentGiven: !!payload.consentGiven,
+  });
+
+  db.children.push(newChild);
+  const updatedChildrenIds = Array.from(new Set([...(parent.childrenIds || []), newChild.id]));
+  const parentIndex = db.parents.findIndex((p) => p.id === parent.id);
+  db.parents[parentIndex] = normalizeParent({ ...parent, childrenIds: updatedChildrenIds });
+
+  await writeDatabase(db);
+  return newChild;
+}
+
 async function updateChild(id, updates) {
   const db = await readDatabase();
-  const index = db.children.findIndex(child => child.id === parseInt(id));
-
+  const index = db.children.findIndex((child) => child.id === parseInt(id));
   if (index === -1) return null;
 
-  db.children[index] = { ...db.children[index], ...updates };
+  const payload = {};
+  if (updates.name !== undefined) payload.name = updates.name;
+  if (updates.age !== undefined) payload.age = updates.age;
+  if (updates.group !== undefined) payload.group = normalizeGroupLabel(updates.group);
+  if (updates.status !== undefined) payload.status = normalizeStatus(updates.status);
+  if (updates.checkedInAt !== undefined) payload.checkedInAt = updates.checkedInAt;
+  if (updates.checkedOutAt !== undefined) payload.checkedOutAt = updates.checkedOutAt;
+  if (updates.allergies !== undefined && Array.isArray(updates.allergies)) payload.allergies = updates.allergies;
+  if (updates.consentGiven !== undefined) payload.consentGiven = !!updates.consentGiven;
+
+  db.children[index] = normalizeChild({ ...db.children[index], ...payload });
   await writeDatabase(db);
   return db.children[index];
 }
 
-// Sjekk inn et barn
 async function checkInChild(id) {
   const updates = {
     status: 'checked_in',
     checkedInAt: new Date().toISOString(),
-    checkedOutAt: null
+    checkedOutAt: null,
   };
   return await updateChild(id, updates);
 }
 
-// Sjekk ut et barn
 async function checkOutChild(id) {
   const updates = {
     status: 'checked_out',
-    checkedOutAt: new Date().toISOString()
+    checkedOutAt: new Date().toISOString(),
   };
   return await updateChild(id, updates);
 }
 
-// Hent alle foreldre
 async function getParents() {
   const db = await readDatabase();
   return db.parents;
 }
 
-// Hent en forelder basert pÃ¥ ID
 async function getParentById(id) {
   const db = await readDatabase();
-  return db.parents.find(parent => parent.id === parseInt(id));
+  return db.parents.find((parent) => parent.id === parseInt(id));
 }
 
-// Opprett en ny forelder
 async function createParent(parent) {
   const db = await readDatabase();
 
   const newParent = {
-    id: db.parents.length > 0 ? Math.max(...db.parents.map(p => p.id)) + 1 : 1,
+    id: nextId(db.parents),
     name: parent.name,
     email: parent.email,
     phone: parent.phone,
-    childrenIds: parent.childrenIds || []
+    address: parent.address || '',
+    verified: !!parent.verified,
+    childrenIds: parent.childrenIds || [],
   };
 
   db.parents.push(newParent);
@@ -98,110 +201,109 @@ async function createParent(parent) {
   return newParent;
 }
 
-// Oppdater forelder
 async function updateParent(id, updates) {
   const db = await readDatabase();
-  const index = db.parents.findIndex(parent => parent.id === parseInt(id));
+  const index = db.parents.findIndex((parent) => parent.id === parseInt(id));
 
   if (index === -1) return null;
 
-  db.parents[index] = { ...db.parents[index], ...updates };
+  const payload = {};
+  if (updates.name !== undefined) payload.name = updates.name;
+  if (updates.email !== undefined) payload.email = updates.email;
+  if (updates.phone !== undefined) payload.phone = updates.phone;
+  if (updates.address !== undefined) payload.address = updates.address;
+  if (updates.verified !== undefined) payload.verified = !!updates.verified;
+  if (updates.childrenIds !== undefined) payload.childrenIds = updates.childrenIds;
+
+  db.parents[index] = normalizeParent({ ...db.parents[index], ...payload });
   await writeDatabase(db);
 
   return db.parents[index];
 }
 
-// Hent alle aktiviteter
 async function getActivities() {
   const db = await readDatabase();
-  return db.activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return db.activities
+    .map(normalizeActivity)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
-// Legg til aktivitet
 async function addActivity(activity) {
   const db = await readDatabase();
   const newActivity = {
-    id: db.activities.length > 0 ? Math.max(...db.activities.map(a => a.id)) + 1 : 1,
+    id: nextId(db.activities),
     ...activity,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
+  if (newActivity.group) {
+    newActivity.group = normalizeGroupLabel(newActivity.group);
+  }
   db.activities.push(newActivity);
   await writeDatabase(db);
   return newActivity;
 }
 
-// Hent aktiviteter for en gruppe
 async function getActivitiesByGroup(groupName) {
   const db = await readDatabase();
+  const key = groupKey(groupName);
 
   return db.activities
-    .filter(activity => activity.group === groupName)
+    .filter((activity) => groupKey(activity.group) === key)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
-// Hent grupper
 async function getGroups() {
   const db = await readDatabase();
-  return db.groups;
+  return db.groups.map(normalizeGroup);
 }
 
-// Oppdater gruppe
 async function updateGroup(id, updates) {
   const db = await readDatabase();
-  const index = db.groups.findIndex(group => group.id === parseInt(id));
+  const index = db.groups.findIndex((group) => group.id === parseInt(id));
 
   if (index === -1) return null;
 
-  db.groups[index] = { ...db.groups[index], ...updates };
+  const payload = {};
+  if (updates.name !== undefined) payload.name = normalizeGroupLabel(updates.name);
+  if (updates.totalCapacity !== undefined) payload.totalCapacity = updates.totalCapacity;
+  if (updates.currentCount !== undefined) payload.currentCount = updates.currentCount;
+
+  db.groups[index] = normalizeGroup({ ...db.groups[index], ...payload });
   await writeDatabase(db);
   return db.groups[index];
 }
 
-// Hent statistikk
 async function getStats() {
   const db = await readDatabase();
-  const totalChildren = db.children.length;
-  const checkedIn = db.children.filter(c => c.status === 'checked_in').length;
-  const checkedOut = db.children.filter(c => c.status === 'checked_out').length;
-  const home = db.children.filter(c => c.status === 'home').length;
+  const children = db.children;
+
+  const totalChildren = children.length;
+  const checkedIn = children.filter((c) => c.status === 'checked_in').length;
+  const checkedOut = children.filter((c) => c.status === 'checked_out').length;
+  const home = children.filter((c) => c.status === 'home').length;
+
+  const counts = {};
+  children.forEach((c) => {
+    const key = groupKey(c.group);
+    if (!counts[key]) counts[key] = 0;
+    if (c.status === 'checked_in') counts[key] += 1;
+  });
+
+  const groups = db.groups.map((g) => {
+    const key = groupKey(g.name);
+    return {
+      ...g,
+      currentCount: counts[key] || 0,
+    };
+  });
 
   return {
     totalChildren,
     checkedIn,
     checkedOut,
     home,
-    groups: db.groups
+    groups,
   };
-}
-
-// Slett forelder + tilknyttede barn + aktiviteter
-async function deleteParentAndData(parentId) {
-  const db = await readDatabase();
-  const id = parseInt(parentId);
-
-  // Finn forelder
-  const parent = db.parents.find(p => p.id === id);
-  if (!parent) {
-    return false; // Ingen forelder Ã¥ slette
-  }
-
-  // Finn alle barn som hÃ¸rer til denne forelderen
-  const childrenToDelete = db.children.filter(child => child.parentId === id);
-  const childIds = new Set(childrenToDelete.map(c => c.id));
-
-  // Slett forelder
-  db.parents = db.parents.filter(p => p.id !== id);
-
-  // Slett barn
-  db.children = db.children.filter(child => child.parentId !== id);
-
-  // Slett aktiviteter knyttet til disse barna 
-  db.activities = db.activities.filter(
-    activity => !childIds.has(activity.childId)
-  );
-
-  await writeDatabase(db);
-  return true;
 }
 
 module.exports = {
@@ -209,6 +311,7 @@ module.exports = {
   writeDatabase,
   getChildren,
   getChildById,
+  addChild,
   updateChild,
   checkInChild,
   checkOutChild,
@@ -217,9 +320,11 @@ module.exports = {
   createParent,
   updateParent,
   getActivities,
+  getActivitiesByGroup,
   addActivity,
   getGroups,
   updateGroup,
   getStats,
-  deleteParentAndData
+  groupKey,
+  normalizeGroupLabel,
 };

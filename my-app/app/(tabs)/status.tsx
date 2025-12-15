@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
 import api, { Stats, Child } from "@/services/api";
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { Palette } from '@/constants/theme';
+import { ChildStatus } from '@/constants/statuses';
+import { useLogger } from '@/hooks/useLogger';
 
 export default function StatusScreen() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -11,16 +11,12 @@ export default function StatusScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { logout } = useAuth();
-  const router = useRouter();
+  const { log, error: logError } = useLogger('StatusScreen');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+      log('Fetching stats and children data');
       const [statsData, childrenData] = await Promise.all([
         api.stats.getStats(),
         api.children.getAll()
@@ -29,12 +25,17 @@ export default function StatusScreen() {
       setChildren(childrenData);
       setError(null);
     } catch (err) {
-      setError('Kunne ikke hente oversikt. Sjekk at serveren kjører.');
-      console.error('Error fetching stats:', err);
+      const errorMsg = 'Kunne ikke hente oversikt. Sjekk at serveren kjører.';
+      setError(errorMsg);
+      logError(errorMsg, { error: err });
     } finally {
       setLoading(false);
     }
-  };
+  }, [log, logError]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -45,8 +46,8 @@ export default function StatusScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={Colors.light.secondary} />
-        <Text style={styles.loadingText}>Laster oversikt...</Text>
+        <ActivityIndicator size="large" color={Palette.primary} />
+        <Text style={styles.text}>Laster oversikt...</Text>
       </View>
     );
   }
@@ -62,317 +63,285 @@ export default function StatusScreen() {
     );
   }
 
-  const checkedInChildren = children.filter(c => c.status === 'checked_in');
-  const checkedOutChildren = children.filter(c => c.status === 'checked_out');
+  const checkedInChildren = children.filter(c => c.status === ChildStatus.CHECKED_IN);
+  const checkedOutChildren = children.filter(c => c.status === ChildStatus.CHECKED_OUT);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Oversikt</Text>
-          <Text style={styles.subtitle}>Barnehageoversikt og statistikk</Text>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <Text style={styles.title}>Barnehageoversikt</Text>
+
+      <View style={styles.statsGrid}>
+        <View style={[styles.statCard, styles.totalCard]}>
+          <Text style={styles.statNumber}>{stats.totalChildren}</Text>
+          <Text style={styles.statLabel}>Totalt barn</Text>
         </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={() => {
-          logout();
-          router.replace('/login' as any);
-        }}>
-          <Text style={styles.logoutText}>Logg ut</Text>
-        </TouchableOpacity>
+
+        <View style={[styles.statCard, styles.inCard]}>
+          <Text style={styles.statNumber}>{stats.checkedIn}</Text>
+          <Text style={styles.statLabel}>Sjekket inn</Text>
+        </View>
+
+        <View style={[styles.statCard, styles.outCard]}>
+          <Text style={styles.statNumber}>{stats.checkedOut}</Text>
+          <Text style={styles.statLabel}>Sjekket ut</Text>
+        </View>
+
+        <View style={[styles.statCard, styles.homeCard]}>
+          <Text style={styles.statNumber}>{stats.home}</Text>
+          <Text style={styles.statLabel}>Hjemme</Text>
+        </View>
       </View>
 
-      <ScrollView
-        style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <View style={styles.statsGrid}>
-          <View style={[styles.statCard, styles.totalCard]}>
-            <Text style={styles.statNumber}>{stats.totalChildren}</Text>
-            <Text style={styles.statLabel}>Totalt barn</Text>
-          </View>
-
-          <View style={[styles.statCard, styles.inCard]}>
-            <Text style={styles.statNumber}>{stats.checkedIn}</Text>
-            <Text style={styles.statLabel}>Sjekket inn</Text>
-          </View>
-
-          <View style={[styles.statCard, styles.outCard]}>
-            <Text style={styles.statNumber}>{stats.checkedOut}</Text>
-            <Text style={styles.statLabel}>Sjekket ut</Text>
-          </View>
-
-          <View style={[styles.statCard, styles.homeCard]}>
-            <Text style={styles.statNumber}>{stats.home}</Text>
-            <Text style={styles.statLabel}>Hjemme</Text>
-          </View>
-        </View>
-
-        {stats.groups && stats.groups.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Grupper</Text>
-            {stats.groups.map(group => (
-              <View key={group.id} style={styles.groupCard}>
-                <View style={styles.groupHeader}>
-                  <Text style={styles.groupName}>{group.name}</Text>
-                  <Text style={styles.groupCount}>
-                    {group.currentCount} / {group.totalCapacity}
-                  </Text>
-                </View>
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: `${(group.currentCount / group.totalCapacity) * 100}%` }
-                    ]}
-                  />
-                </View>
+      {stats.groups && stats.groups.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Grupper</Text>
+          {stats.groups.map(group => (
+            <View key={group.id} style={styles.groupCard}>
+              <View style={styles.groupHeader}>
+                <Text style={styles.groupName}>{group.name}</Text>
+                <Text style={styles.groupCount}>
+                  {group.currentCount} / {group.totalCapacity}
+                </Text>
               </View>
-            ))}
-          </View>
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${(group.currentCount / group.totalCapacity) * 100}%` }
+                  ]}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Barn inne nå ({checkedInChildren.length})</Text>
+        {checkedInChildren.length > 0 ? (
+          checkedInChildren.map(child => (
+            <View key={child.id} style={styles.childCard}>
+              <View style={styles.childAvatar}>
+                <Text style={styles.childAvatarText}>{child.name.charAt(0)}</Text>
+              </View>
+              <View style={styles.childInfo}>
+                <Text style={styles.childName}>{child.name}</Text>
+                <Text style={styles.childGroup}>{child.group}</Text>
+              </View>
+              <Text style={styles.childTime}>
+                {child.checkedInAt && new Date(child.checkedInAt).toLocaleTimeString('nb-NO', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>Ingen barn inne for øyeblikket</Text>
         )}
+      </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Barn inne nå ({checkedInChildren.length})</Text>
-          {checkedInChildren.length > 0 ? (
-            checkedInChildren.map(child => (
-              <View key={child.id} style={styles.childCard}>
-                <View style={styles.childAvatar}>
-                  <Text style={styles.childAvatarText}>{child.name.charAt(0)}</Text>
-                </View>
-                <View style={styles.childInfo}>
-                  <Text style={styles.childName}>{child.name}</Text>
-                  <Text style={styles.childGroup}>{child.group}</Text>
-                </View>
-                <Text style={styles.childTime}>
-                  {child.checkedInAt && new Date(child.checkedInAt).toLocaleTimeString('nb-NO', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Sjekket ut ({checkedOutChildren.length})</Text>
+        {checkedOutChildren.length > 0 ? (
+          checkedOutChildren.map(child => (
+            <View key={child.id} style={styles.childCard}>
+              <View style={styles.childAvatar}>
+                <Text style={styles.childAvatarText}>{child.name.charAt(0)}</Text>
               </View>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>Ingen barn inne for øyeblikket</Text>
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sjekket ut ({checkedOutChildren.length})</Text>
-          {checkedOutChildren.length > 0 ? (
-            checkedOutChildren.map(child => (
-              <View key={child.id} style={styles.childCard}>
-                <View style={styles.childAvatar}>
-                  <Text style={styles.childAvatarText}>{child.name.charAt(0)}</Text>
-                </View>
-                <View style={styles.childInfo}>
-                  <Text style={styles.childName}>{child.name}</Text>
-                  <Text style={styles.childGroup}>{child.group}</Text>
-                </View>
-                <Text style={styles.childTime}>
-                  {child.checkedOutAt && new Date(child.checkedOutAt).toLocaleTimeString('nb-NO', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </Text>
+              <View style={styles.childInfo}>
+                <Text style={styles.childName}>{child.name}</Text>
+                <Text style={styles.childGroup}>{child.group}</Text>
               </View>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>Ingen barn sjekket ut ennå</Text>
-          )}
-        </View>
-      </ScrollView>
-    </View>
+              <Text style={styles.childTime}>
+                {child.checkedOutAt && new Date(child.checkedOutAt).toLocaleTimeString('nb-NO', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>Ingen barn sjekket ut ennå</Text>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.backgroundSecondary,
+    backgroundColor: '#F5F7FB',
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.lg,
-  },
-  header: {
-    backgroundColor: Colors.light.primary,
-    padding: Spacing.lg,
-    paddingTop: 60,
-    paddingBottom: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  logoutButton: {
-    backgroundColor: Colors.light.buttonDanger,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-    marginTop: 5,
-  },
-  logoutText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
+    padding: 20,
   },
   title: {
-    fontSize: 48,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.light.textWhite,
-  },
-  subtitle: {
-    fontSize: Typography.fontSize.lg,
-    color: Colors.light.textWhite,
-    marginTop: 5,
-  },
-  content: {
-    flex: 1,
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 20,
+    marginTop: 20,
+    marginHorizontal: 20,
+    color: '#333',
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: Spacing.base,
+    padding: 10,
   },
   statCard: {
     width: '47%',
     margin: '1.5%',
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.xl,
+    padding: 20,
+    borderRadius: 12,
     alignItems: 'center',
-    ...Shadows.medium,
   },
   totalCard: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: '#007AFF',
   },
   inCard: {
-    backgroundColor: Colors.light.success,
+    backgroundColor: '#34C759',
   },
   outCard: {
-    backgroundColor: Colors.light.warning,
+    backgroundColor: '#FF9500',
   },
   homeCard: {
-    backgroundColor: Colors.light.textSecondary,
+    backgroundColor: '#8E8E93',
   },
   statNumber: {
     fontSize: 36,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.light.textWhite,
+    fontWeight: 'bold',
+    color: 'white',
   },
   statLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.light.textWhite,
-    marginTop: Spacing.xs,
+    fontSize: 14,
+    color: 'white',
+    marginTop: 5,
   },
   section: {
-    backgroundColor: Colors.light.card,
-    padding: Spacing.lg,
-    marginTop: Spacing.md,
-    marginHorizontal: Spacing.base,
-    borderRadius: BorderRadius.xl,
-    ...Shadows.medium,
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 15,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    marginBottom: Spacing.md,
-    color: Colors.light.text,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
   },
   groupCard: {
-    padding: Spacing.md,
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.sm,
+    padding: 15,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   groupHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
+    marginBottom: 10,
   },
   groupName: {
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.light.text,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   },
   groupCount: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.textSecondary,
+    fontSize: 16,
+    color: '#666',
   },
   progressBar: {
     height: 8,
-    backgroundColor: Colors.light.inputBorder,
-    borderRadius: BorderRadius.sm,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.light.success,
+    backgroundColor: '#34C759',
   },
   childCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.base,
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.sm,
+    padding: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   childAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.light.avatarBackground,
+    backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Spacing.base,
+    marginRight: 12,
   },
   childAvatarText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   childInfo: {
     flex: 1,
   },
   childName: {
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.light.text,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   },
   childGroup: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.light.textSecondary,
+    fontSize: 14,
+    color: '#666',
     marginTop: 2,
   },
   childTime: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.light.textSecondary,
+    fontSize: 14,
+    color: '#666',
   },
   emptyText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.light.textSecondary,
+    fontSize: 14,
+    color: '#999',
     fontStyle: 'italic',
   },
-  loadingText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.textSecondary,
-    marginTop: Spacing.md,
+  text: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 10,
   },
   errorText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.light.buttonDanger,
+    fontSize: 16,
+    color: 'red',
     textAlign: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: Colors.light.primary,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.base,
-    borderRadius: BorderRadius.md,
+    backgroundColor: Palette.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   retryText: {
-    color: Colors.light.textWhite,
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.semibold,
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

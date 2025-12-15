@@ -2,21 +2,27 @@
   "name": "barnehage-backend",
   "version": "1.0.0",
   "description": "Backend API for Barnehage app",
+  "private": true,
+  "type": "commonjs",
   "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "gen:map": "node tools/generate-project-map.js",
+    "map:validate": "node tools/validate-project-map.js",
+    "map:docs": "node tools/summarize-project-map.js",
+    "map:print": "node tools/print-project-map.js",
+    "fix:db": "node tools/fix-db.js"
   },
   "dependencies": {
-    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "react-dom": "19.1.0",
-    "react-native-web": "^0.21.0"
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
-    "@types/react": "~19.1.10",
-    "nodemon": "^3.0.0",
-    "typescript": "~5.9.2"
+    "nodemon": "^3.0.0"
   }
 }

@@ -2,127 +2,133 @@
   "children": [
     {
       "id": 1,
-      "name": "Liam Hansen",
-      "birthDate": "2021-03-15",
-      "age": 4,
-      "group": "Blå gruppe",
-      "allergies": [
-        "Nøtter",
-        "Egg"
-      ],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-03T10:23:25.491Z",
-      "checkedOutAt": "2025-12-08T11:37:31.162Z",
-      "parentId": 1
-    },
-    {
-      "id": 2,
       "name": "Emma Johansen",
       "birthDate": "2021-07-20",
       "age": 4,
-      "group": "Blå gruppe",
+      "group": "Bl� gruppe",
       "allergies": [],
-      "status": "checked_in",
-      "checkedInAt": "2025-12-03T10:23:34.976Z",
-      "checkedOutAt": null,
-      "parentId": 2
+      "status": "checked_out",
+      "checkedInAt": "2025-12-15T08:02:59.785Z",
+      "checkedOutAt": "2025-12-15T08:03:01.032Z",
+      "parentId": 1,
+      "consentGiven": false
     },
     {
-      "id": 3,
+      "id": 2,
       "name": "Noah Olsen",
       "birthDate": "2022-01-10",
       "age": 3,
-      "group": "Blå gruppe",
+      "group": "Bl� gruppe",
       "allergies": [],
       "status": "checked_out",
-      "checkedInAt": "2025-12-08T12:06:52.810Z",
-      "checkedOutAt": "2025-12-08T12:06:57.962Z",
-      "parentId": 3
+      "checkedInAt": "2025-12-15T02:04:32.866Z",
+      "checkedOutAt": "2025-12-15T04:00:00.000Z",
+      "parentId": 2,
+      "consentGiven": false
     },
     {
-      "id": 4,
+      "id": 3,
       "name": "Olivia Berg",
       "birthDate": "2021-09-05",
       "age": 4,
-      "group": "Blå gruppe",
+      "group": "R�d gruppe",
       "allergies": [
         "Laktose"
       ],
-      "status": "checked_in",
-      "checkedInAt": "2025-12-08T11:37:28.299Z",
-      "checkedOutAt": null,
-      "parentId": 4
+      "status": "checked_out",
+      "checkedInAt": "2025-12-15T07:20:00.000Z",
+      "checkedOutAt": "2025-12-15T04:42:40.315Z",
+      "parentId": 3,
+      "consentGiven": false
     },
     {
-      "id": 5,
+      "id": 4,
       "name": "Lucas Nilsen",
       "birthDate": "2021-11-22",
       "age": 3,
-      "group": "Blå gruppe",
+      "group": "Bl� gruppe",
       "allergies": [],
       "status": "checked_in",
-      "checkedInAt": "2025-12-08T12:22:55.025Z",
+      "checkedInAt": "2025-12-15T05:06:35.457Z",
       "checkedOutAt": null,
-      "parentId": 5
+      "parentId": 4,
+      "consentGiven": false
     },
     {
-      "id": 6,
-      "name": "Maja Hansen",
-      "birthDate": "2022-02-14",
-      "age": 2,
-      "group": "Rød gruppe",
-      "allergies": [],
-      "status": "home",
-      "checkedInAt": null,
-      "checkedOutAt": null,
-      "parentId": 1
-    },
-    {
-      "id": 7,
+      "id": 5,
       "name": "Elias Larsen",
       "birthDate": "2021-04-30",
       "age": 4,
-      "group": "Rød gruppe",
+      "group": "R�d gruppe",
       "allergies": [
         "Gluten"
       ],
-      "status": "checked_out",
-      "checkedInAt": "2025-12-08T07:52:00.167Z",
-      "checkedOutAt": "2025-12-08T07:52:57.278Z",
-      "parentId": 7
+      "status": "checked_in",
+      "checkedInAt": "2025-12-15T05:06:34.913Z",
+      "checkedOutAt": null,
+      "parentId": 5,
+      "consentGiven": false
     },
     {
-      "id": 8,
+      "id": 6,
       "name": "Sara Kristiansen",
       "birthDate": "2022-06-18",
       "age": 3,
-      "group": "Rød gruppe",
+      "group": "R�d gruppe",
       "allergies": [],
+      "status": "checked_in",
+      "checkedInAt": "2025-12-15T05:06:32.671Z",
+      "checkedOutAt": null,
+      "parentId": 6,
+      "consentGiven": false
+    },
+    {
+      "id": 7,
+      "name": "Ada Solheim",
+      "birthDate": "2023-03-12",
+      "age": 2,
+      "group": "Bl� gruppe",
+      "allergies": [
+        "Egg"
+      ],
       "status": "checked_out",
-      "checkedInAt": "2025-12-08T07:52:02.393Z",
-      "checkedOutAt": "2025-12-08T07:52:56.734Z",
-      "parentId": 8
+      "checkedInAt": "2025-12-15T07:05:00.000Z",
+      "checkedOutAt": "2025-12-15T04:42:33.524Z",
+      "parentId": 7,
+      "consentGiven": false
+    },
+    {
+      "id": 8,
+      "name": "Mikkel Haugen",
+      "birthDate": "2020-12-02",
+      "age": 5,
+      "group": "R�d gruppe",
+      "allergies": [],
+      "status": "checked_in",
+      "checkedInAt": "2025-12-15T05:06:31.279Z",
+      "checkedOutAt": null,
+      "parentId": 8,
+      "consentGiven": false
     }
   ],
   "parents": [
     {
       "id": 1,
-      "name": "Kari Hansen",
-      "email": "kari.hansen@example.com",
-      "phone": "12345678",
-      "address": "Storgata 1, Oslo",
+      "name": "Kari Johansen",
+      "email": "kari.johansen@example.com",
+      "phone": "48000001",
+      "address": "Markveien 12, Oslo",
       "childrenIds": [
-        1,
-        6
+        1
       ],
       "verified": true
     },
     {
       "id": 2,
-      "name": "Per Johansen",
-      "email": "per.johansen@example.com",
-      "phone": "87654321",
-      "address": "Lille vei 5, Bergen",
+      "name": "Per Olsen",
+      "email": "per.olsen@example.com",
+      "phone": "48000002",
+      "address": "S�rligata 3, Oslo",
       "childrenIds": [
         2
       ],
@@ -130,10 +136,10 @@
     },
     {
       "id": 3,
-      "name": "Sofia Andersen",
-      "email": "sofia.andersen@example.com",
-      "phone": "11223344",
-      "address": "Haugeveien 12, Trondheim",
+      "name": "Sofia Berg",
+      "email": "sofia.berg@example.com",
+      "phone": "48000003",
+      "address": "Sandakerveien 20, Oslo",
       "childrenIds": [
         3
       ],
@@ -141,10 +147,10 @@
     },
     {
       "id": 4,
-      "name": "Martin Berg",
-      "email": "martin.berg@example.com",
-      "phone": "99887766",
-      "address": "Parkveien 7, Oslo",
+      "name": "Martin Nilsen",
+      "email": "martin.nilsen@example.com",
+      "phone": "48000004",
+      "address": "Vikaveien 7, Bergen",
       "childrenIds": [
         4
       ],
@@ -152,10 +158,10 @@
     },
     {
       "id": 5,
-      "name": "Anne Nilsen",
-      "email": "anne.nilsen@example.com",
-      "phone": "44556677",
-      "address": "Bjørnveien 3, Bergen",
+      "name": "Linda Larsen",
+      "email": "linda.larsen@example.com",
+      "phone": "48000005",
+      "address": "Fjordveien 8, Trondheim",
       "childrenIds": [
         5
       ],
@@ -163,10 +169,10 @@
     },
     {
       "id": 6,
-      "name": "Tom Pedersen",
-      "email": "tom.pedersen@example.com",
-      "phone": "33445566",
-      "address": "Rosegata 15, Stavanger",
+      "name": "Tom Kristiansen",
+      "email": "tom.kristiansen@example.com",
+      "phone": "48000006",
+      "address": "Strandgata 15, Stavanger",
       "childrenIds": [
         6
       ],
@@ -174,10 +180,10 @@
     },
     {
       "id": 7,
-      "name": "Linda Larsen",
-      "email": "linda.larsen@example.com",
-      "phone": "22334455",
-      "address": "Solveien 9, Tromsø",
+      "name": "Ingrid Solheim",
+      "email": "ingrid.solheim@example.com",
+      "phone": "48000007",
+      "address": "H�konsgate 9, Troms�",
       "childrenIds": [
         7
       ],
@@ -185,26 +191,22 @@
     },
     {
       "id": 8,
-      "name": "Erik Kristiansen",
-      "email": "erik.kristiansen@example.com",
-      "phone": "55667788",
-      "address": "Måkeveien 11, Kristiansand",
+      "name": "Erik Haugen",
+      "email": "erik.haugen@example.com",
+      "phone": "48000008",
+      "address": "Storgata 1, Kristiansand",
       "childrenIds": [
         8
-      ]
+      ],
+      "verified": true
     },
     {
       "id": 9,
-      "name": "Siri Hagen",
-      "email": "sirihagen2gmail.com",
-      "phone": "90463178",
-      "childrenIds": []
-    },
-    {
-      "id": 10,
-      "name": "Linn Nordman",
-      "email": "LinnNordmann@example.com",
-      "phone": "12345678",
+      "name": "Dexter Morgan",
+      "email": "Dex@dex.com",
+      "phone": "2123423234",
+      "address": "",
+      "verified": true,
       "childrenIds": []
     }
   ],
@@ -212,43 +214,86 @@
     {
       "id": 1,
       "title": "Maling og kreativitet",
-      "description": "I dag hadde vi en fin maletime! Barna lagde flotte høstbilder med fingerfarger.",
+      "description": "Fingerfarger og h�stblader. Barna lagde fine bilder til veggen.",
       "imageUrl": null,
-      "createdAt": "2025-12-02T10:30:00Z",
+      "videoUrl": null,
+      "createdAt": "2025-12-15T08:30:00.000Z",
       "createdBy": "staff",
-      "group": "Blå gruppe"
+      "group": "Bl� gruppe"
     },
     {
       "id": 2,
-      "title": "Uteleker",
-      "description": "Vi var ute og lekte i snøen. Barna bygget en stor snømann!",
+      "title": "Utelek i sn�en",
+      "description": "Sn�mann, akebakke og varm saft etterp�.",
       "imageUrl": null,
-      "createdAt": "2025-12-02T12:00:00Z",
+      "videoUrl": null,
+      "createdAt": "2025-12-15T09:10:00.000Z",
       "createdBy": "staff",
-      "group": "Blå gruppe"
+      "group": "R�d gruppe"
     },
     {
       "id": 3,
-      "title": "Tur i skogen",
-      "description": "idag gikk vi tur i skogen",
+      "title": "Eventyrstund",
+      "description": "H�rte om Bukkene Bruse f�r lunsj.",
       "imageUrl": null,
+      "videoUrl": null,
+      "createdAt": "2025-12-14T10:00:00.000Z",
       "createdBy": "staff",
-      "group": "Blå gruppe",
-      "createdAt": "2025-12-14T10:11:22.657Z"
+      "group": "Bl� gruppe"
+    },
+    {
+      "id": 4,
+      "title": "Tur i skogen",
+      "description": "Fant kongler og s� etter spor fra dyr.",
+      "imageUrl": null,
+      "videoUrl": null,
+      "createdAt": "2025-12-14T12:00:00.000Z",
+      "createdBy": "staff",
+      "group": "R�d gruppe"
+    },
+    {
+      "id": 5,
+      "title": "Sangsamling",
+      "description": "Sang Lille Petter Edderkopp og Bro bro brille.",
+      "imageUrl": null,
+      "videoUrl": null,
+      "createdAt": "2025-12-13T09:00:00.000Z",
+      "createdBy": "staff",
+      "group": "Bl� gruppe"
+    },
+    {
+      "id": 6,
+      "title": "As",
+      "description": "dsds",
+      "imageUrl": null,
+      "videoUrl": null,
+      "createdBy": "staff",
+      "group": "Bl� gruppe",
+      "createdAt": "2025-12-15T06:38:18.788Z"
     }
   ],
   "groups": [
     {
       "id": 1,
-      "name": "Blå gruppe",
+      "name": "Bl� gruppe",
       "totalCapacity": 12,
-      "currentCount": 5
+      "currentCount": 4
     },
     {
       "id": 2,
-      "name": "Rød gruppe",
-      "totalCapacity": 10,
-      "currentCount": 3
+      "name": "R�d gruppe",
+      "totalCapacity": 12,
+      "currentCount": 4
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "parentId": 1,
+      "sender": "staff",
+      "content": "Hei",
+      "createdAt": "2025-12-15T08:01:15.463Z",
+      "read": false
     }
   ]
 }
